@@ -1,4 +1,4 @@
-"""Public routes"""
+"""Public test_routes"""
 from typing import Dict
 from typing import Optional
 from typing import Union
@@ -19,7 +19,7 @@ from app.services.auth.base import refresh_tokens
 
 
 async def process_auth_route(code: str) -> None:  # pylint: disable=unused-argument
-    """Process auth routes"""
+    """Process test_auth test_routes"""
     ...
 
 
@@ -47,7 +47,7 @@ auth_router.include_router(spotify_router)
 auth_router.include_router(vk_router)
 
 
-@auth_router.post("/logout/", response_model=LogoutOut, summary="Destroy auth session")
+@auth_router.post("/logout/", response_model=LogoutOut, summary="Destroy test_auth session")
 async def logout_route(
     request: Request, user_id: str = Depends(bearer_auth)
 ) -> LogoutOut:

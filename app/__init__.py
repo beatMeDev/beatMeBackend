@@ -41,7 +41,7 @@ def get_application() -> FastAPI:
     # Router section
     router = APIRouter()
 
-    router.include_router(auth_router, prefix="/auth", tags=["Auth"])
+    router.include_router(auth_router, prefix="/test_auth", tags=["Auth"])
     router.include_router(users_route, prefix="/users", tags=["Users"])
     app.include_router(router, prefix="/api")
 

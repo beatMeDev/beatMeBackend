@@ -1,5 +1,5 @@
 """
-Base auth services
+Base test_auth test_services
 """
 from datetime import datetime
 from datetime import timedelta
@@ -36,7 +36,7 @@ class OAuthRoute(APIRoute):
     """
     Base OAuth fastapi route class.
 
-    get_route_handler - main auth logic,
+    get_route_handler - main test_auth logic,
     code_auth and get_account_info should be implemented in third party providers.
     """
 
@@ -55,7 +55,7 @@ class OAuthRoute(APIRoute):
     async def get_account_info(self, access_token: str) -> Dict[str, str]:
         """
         Get profile information
-        :param access_token: auth service token
+        :param access_token: test_auth service token
         :return: profile information: {"id": "1", "name": "Test", "image": "link", "url": "link"}
         """
         raise NotImplementedError
@@ -109,7 +109,7 @@ class OAuthRoute(APIRoute):
 
 async def create_tokens(user_id: str) -> Dict[str, Union[str, int]]:
     """
-    Create auth tokens
+    Create test_auth tokens
     :param user_id: user's id
     :return: tokens pair and access expire: {
                                                 "access_token": "str",

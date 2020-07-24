@@ -1,4 +1,4 @@
-"""Base auth services test."""
+"""Base test_auth test_services test."""
 
 import asyncio
 
@@ -39,15 +39,15 @@ async def endpoint_logic() -> None:
 
 
 class TestOAuthRoute(OAuthRoute):
-    """Test auth class with mocked methods."""
+    """Test test_auth class with mocked methods."""
 
     __test__ = False
 
     async def code_auth(self, code: str) -> str:
         """
-        Code auth mock.
+        Code test_auth mock.
 
-        :param code: auth code
+        :param code: test_auth code
         :return: mock value
         """
         return "access_token"
@@ -118,7 +118,7 @@ async def test_create_tokens_check_tokens(set_mock: MagicMock) -> None:
 @mock.patch("app.extensions.redis_client.set")
 async def test_base_auth_route(set_mock: MagicMock) -> None:
     """
-    Check auth handler when AuthAccount and User are not exist,
+    Check test_auth handler when AuthAccount and User are not exist,
     AuthAccount, User and relation between them should be created,
     tokens should be returned.
     """
@@ -195,4 +195,4 @@ async def test_refresh_tokens(
 # TODO check account exists and user exists(user_id in scope)
 # TODO check account exists and user exists(user_id not in scope)
 # TODO check account exists and user not exists
-# TODO check relation user and auth account
+# TODO check relation user and test_auth account
