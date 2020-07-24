@@ -1,6 +1,7 @@
 # Beat Me
 
 [![Tests](https://github.com/beatMeDev/beatMeBackend/workflows/tests/badge.svg)](https://github.com/beatMeDev/beatMeBackend/actions?query=workflow%3Atests)
+[![Styles](https://github.com/beatMeDev/beatMeBackend/workflows/styles/badge.svg)](https://github.com/beatMeDev/beatMeBackend/actions?query=workflow%3Astyles)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/beatMeDev/beatMeBackend/blob/master/LICENSE)
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
@@ -68,7 +69,4 @@ app                     - app root directory
 ├── settings            - applicaitons settings
 └── utils               - other stuff
 tests                   - tests root directory
-├── services            - services tests
-│   └── auth            - auth tests
-└── routes              - routes tests
 ```

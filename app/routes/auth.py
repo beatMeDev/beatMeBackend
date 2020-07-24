@@ -1,4 +1,4 @@
-"""Public test_routes"""
+"""Auth routes"""
 from typing import Dict
 from typing import Optional
 from typing import Union
@@ -49,7 +49,7 @@ auth_router.include_router(vk_router)
 
 @auth_router.post("/logout/", response_model=LogoutOut, summary="Destroy test_auth session")
 async def logout_route(
-    request: Request, user_id: str = Depends(bearer_auth)
+    request: Request, user_id: str = Depends(bearer_auth)  # pylint: disable=unused-argument
 ) -> LogoutOut:
     access_token: Optional[str] = request.scope.get("token")
     result: bool = await logout(access_token=access_token)
@@ -59,12 +59,15 @@ async def logout_route(
 
 
 @auth_router.post("/refresh/", response_model=AuthOut, summary="Refresh tokens")
-async def refresh_route(request: Request, user_id=Depends(bearer_auth)) -> AuthOut:
+async def refresh_route(
+    request: Request,
+    user_id: str = Depends(bearer_auth)  # pylint: disable=unused-argument
+) -> AuthOut:
     refresh_token: str = request.scope["token"]
 
     tokens: Dict[str, Union[str, int]] = await refresh_tokens(
         refresh_token=refresh_token
     )
-    response: AuthOut = AuthOut(**tokens)
+    response: AuthOut = AuthOut(**tokens)  # type: ignore
 
     return response

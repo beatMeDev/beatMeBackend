@@ -16,15 +16,16 @@ from app.utils.exceptions import UnauthorizedError
 
 
 class SpotifyAuth(OAuthRoute):
+    """Spotify auth integration"""
     provider = AuthProvider.SPOTIFY
     auth_endpoint = "https://accounts.spotify.com/api/token"
     account_endpoint = "https://api.spotify.com/v1/me/"
 
     async def code_auth(self, code: str) -> str:
-        auth_data = b64encode(f"{SPOTIFY_ID}:{SPOTIFY_SECRET}".encode("utf-8")).decode(
+        auth_token = b64encode(f"{SPOTIFY_ID}:{SPOTIFY_SECRET}".encode("utf-8")).decode(
             "utf-8"
         )
-        headers = {"Authorization": f"Basic {auth_data}"}
+        headers = {"Authorization": f"Basic {auth_token}"}
         data = {
             "redirect_uri": SPOTIFY_REDIRECT_URI,
             "code": code,

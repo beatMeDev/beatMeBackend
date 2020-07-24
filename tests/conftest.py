@@ -24,7 +24,7 @@ async def db() -> AsyncGenerator:  # type: ignore
     yield
 
     try:
-        await Tortoise._drop_databases()
+        await Tortoise._drop_databases()  # pylint: disable=protected-access
     except ObjectInUseError:
         pass
 

@@ -16,6 +16,7 @@ from app.utils.exceptions import UnauthorizedError
 
 
 class FacebookAuth(OAuthRoute):
+    """Facebook auth integration"""
     provider = AuthProvider.FACEBOOK
     auth_endpoint = (
         f"https://graph.facebook.com/{FACEBOOK_API_VERSION}/oauth/access_token"

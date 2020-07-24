@@ -14,8 +14,8 @@ import jwt
 import pytest
 
 from fastapi.responses import ORJSONResponse
-from orjson import dumps
-from orjson import loads
+from orjson import dumps  # pylint: disable-msg=E0611
+from orjson import loads  # pylint: disable-msg=E0611
 from starlette.datastructures import QueryParams
 from starlette.requests import Request
 
@@ -90,7 +90,7 @@ async def test_create_tokens_check_schema(set_mock: MagicMock) -> None:
 
     tokens: Dict[str, Union[str, int]] = await create_tokens(user_id=str(user_uuid))
 
-    assert AuthOut(**tokens).validate(tokens)
+    assert AuthOut(**tokens).validate(tokens)  # type: ignore
 
 
 @pytest.mark.asyncio
@@ -99,10 +99,10 @@ async def test_create_tokens_check_tokens(set_mock: MagicMock) -> None:
     set_mock.return_value = asyncio.Future()
     set_mock.return_value.set_result(True)
 
-    tokens: Dict[str, Union[str, int]] = await create_tokens(user_id=str(user_uuid))
+    tokens: Dict[str, Any] = await create_tokens(user_id=str(user_uuid))
 
-    access_token = tokens.get("access_token")
-    refresh_token = tokens.get("refresh_token")
+    access_token: str = tokens["access_token"]
+    refresh_token: str = tokens["refresh_token"]
     access_token_data: Dict[str, Any] = jwt.decode(
         jwt=access_token, key=JWT_SECRET, algorithms=[JWT_ALGORITHM]
     )
@@ -142,7 +142,7 @@ async def test_base_auth_route(set_mock: MagicMock) -> None:
 @mock.patch("app.extensions.redis_client.set")
 @mock.patch("app.extensions.redis_client.get")
 @mock.patch("app.extensions.redis_client.delete")
-async def test_logout(delete_mock: MagicMock, get_mock: MagicMock, set_mock: MagicMock):
+async def test_logout(delete_mock: MagicMock, get_mock: MagicMock, set_mock: MagicMock) -> None:
     """
     Check that access token and refresh token will be deleted from redis.
     """
@@ -150,7 +150,7 @@ async def test_logout(delete_mock: MagicMock, get_mock: MagicMock, set_mock: Mag
     delete_mock.return_value.set_result(True)
     set_mock.return_value = asyncio.Future()
     set_mock.return_value.set_result(True)
-    tokens: Dict[str, Union[str, int]] = await create_tokens(user_id=str(user_uuid))
+    tokens: Dict[str, Any] = await create_tokens(user_id=str(user_uuid))
     access_token: str = tokens["access_token"]
     refresh_token: str = tokens["refresh_token"]
     get_mock.return_value = asyncio.Future()
@@ -169,7 +169,7 @@ async def test_logout(delete_mock: MagicMock, get_mock: MagicMock, set_mock: Mag
 @mock.patch("app.extensions.redis_client.delete")
 async def test_refresh_tokens(
     delete_mock: MagicMock, get_mock: MagicMock, set_mock: MagicMock
-):
+) -> None:
     """
     Test tokens refreshing
     """
@@ -178,7 +178,7 @@ async def test_refresh_tokens(
     set_mock.return_value = asyncio.Future()
     set_mock.return_value.set_result(True)
 
-    tokens: Dict[str, Union[str, int]] = await create_tokens(user_id=str(user_uuid))
+    tokens: Dict[str, Any] = await create_tokens(user_id=str(user_uuid))
     get_mock.return_value = asyncio.Future()
     get_mock.return_value.set_result(
         dumps({"access_token": tokens["access_token"], "user_id": str(user_uuid)})
@@ -189,10 +189,5 @@ async def test_refresh_tokens(
         refresh_token=refresh_token
     )
 
-    assert AuthOut(**new_tokens).validate(new_tokens)
+    assert AuthOut(**new_tokens).validate(new_tokens)  # type: ignore
 
-
-# TODO check account exists and user exists(user_id in scope)
-# TODO check account exists and user exists(user_id not in scope)
-# TODO check account exists and user not exists
-# TODO check relation user and test_auth account

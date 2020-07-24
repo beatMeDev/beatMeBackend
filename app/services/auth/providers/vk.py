@@ -17,6 +17,7 @@ from app.utils.exceptions import UnauthorizedError
 
 
 class VKAuth(OAuthRoute):
+    """VK auth integration"""
     provider = AuthProvider.VK
     auth_endpoint = "https://oauth.vk.com/access_token"
     account_endpoint = "https://api.vk.com/method/users.get"

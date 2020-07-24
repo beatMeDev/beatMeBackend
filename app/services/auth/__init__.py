@@ -1,5 +1,5 @@
 """
-Auth test_services
+Auth services
 """
 from .providers.facebook import FacebookAuth
 from .providers.google import GoogleAuth

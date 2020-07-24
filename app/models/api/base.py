@@ -1,3 +1,4 @@
+# pylint: skip-file
 """
 Base pydantic models
 """

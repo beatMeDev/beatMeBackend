@@ -1,3 +1,4 @@
+"""App extensions"""
 from aioredis import Redis
 from httpx import AsyncClient
 
