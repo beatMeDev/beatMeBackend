@@ -14,15 +14,15 @@ jobs:
     - name: Install poetry
       run: pip install poetry==1.0.10
     - uses: actions/cache@v2
-        id: cache-packages
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-py-${{ python-version }}-poetry-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            venv-${{ runner.os }}-py-${{ python-version }}-poetry-
-            venv-${{ runner.os }}-py-${{ python-version }}-
-            venv-${{ runner.os }}-py-
-            venv-${{ runner.os }}-
+      id: cache-packages
+      with:
+        path: .venv
+        key: venv-${{ runner.os }}-py-${{ python-version }}-poetry-${{ hashFiles('poetry.lock') }}
+        restore-keys: |
+          venv-${{ runner.os }}-py-${{ python-version }}-poetry-
+          venv-${{ runner.os }}-py-${{ python-version }}-
+          venv-${{ runner.os }}-py-
+          venv-${{ runner.os }}-
     - name: Install dependencies
       if: steps.cache-packages.outputs.cache-hit != 'true'
       run: |
