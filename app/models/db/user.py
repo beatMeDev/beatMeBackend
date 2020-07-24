@@ -1,3 +1,4 @@
+"""User models"""
 from enum import Enum
 from typing import Iterator
 
@@ -7,6 +8,7 @@ from tortoise import models
 
 
 class AuthProvider(str, Enum):
+    """Auth providers enum."""
     DEFAULT = "DEFAULT"
     SPOTIFY = "SPOTIFY"
     GOOGLE = "GOOGLE"
@@ -18,16 +20,15 @@ class AuthProvider(str, Enum):
 
 
 class User(models.Model):
+    """User model."""
     id = fields.UUIDField(pk=True)
     auth_accounts = fields.ManyToManyField(
         "models.AuthAccount", related_name="users", through="users_auth_accounts"
     )
 
-    class PydanticMeta:
-        pass
-
 
 class AuthAccount(models.Model):
+    """Auth account model."""
     _id = fields.UUIDField(pk=True)
     id = fields.CharField(max_length=255, null=False)
     access_token = fields.CharField(max_length=1024, null=True)
@@ -36,7 +37,8 @@ class AuthAccount(models.Model):
     url = fields.CharField(max_length=2048, null=True)
     provider = fields.CharEnumField(AuthProvider, default=None)
 
-    class PydanticMeta:
+    class PydanticMeta:  # pylint: disable=too-few-public-methods
+        """Serializations options."""
         exclude = ("access_token",)
 
 

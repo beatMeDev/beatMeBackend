@@ -2,7 +2,7 @@ name: styles
 on: [push, pull_request]
 
 jobs:
-  pytest:
+  styles:
     name: styles
     runs-on: ubuntu-latest
     steps:
@@ -10,25 +10,23 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python_version: 3.8.4
+        python-version: 3.8.4
     - name: Install poetry
       run: pip install poetry==1.0.10
     - uses: actions/cache@v2
       id: cache-packages
       with:
         path: .venv
-        key: venv-${{ runner.os }}-py-${{ python-version }}-poetry-${{ hashFiles('poetry.lock') }}
+        key: venv-${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
         restore-keys: |
-          venv-${{ runner.os }}-py-${{ python-version }}-poetry-
-          venv-${{ runner.os }}-py-${{ python-version }}-
-          venv-${{ runner.os }}-py-
+          venv-${{ runner.os }}-poetry-
           venv-${{ runner.os }}-
     - name: Install dependencies
       if: steps.cache-packages.outputs.cache-hit != 'true'
       run: |
         poetry config virtualenvs.in-project true
         poetry install
-    - name: Run tests
+    - name: Run styles
       run: |
         source .venv/bin/activate
         ./scripts/styles

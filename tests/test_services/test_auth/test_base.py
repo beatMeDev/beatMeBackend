@@ -30,12 +30,13 @@ from app.settings import JWT_ALGORITHM
 from app.settings import JWT_SECRET
 
 
-user_uuid = UUID("ef4b35cb-1c32-43b7-a986-14ba5d05064f")
-auth_account_id = "1"
+USER_UUID = UUID("ef4b35cb-1c32-43b7-a986-14ba5d05064f")
+AUTH_ACCOUNT_ID = "1"
 
 
 async def endpoint_logic() -> None:
-    pass
+    """Endpoint logic mock"""
+    return None
 
 
 class TestOAuthRoute(OAuthRoute):
@@ -46,7 +47,6 @@ class TestOAuthRoute(OAuthRoute):
     async def code_auth(self, code: str) -> str:
         """
         Code test_auth mock.
-
         :param code: test_auth code
         :return: mock value
         """
@@ -54,16 +54,18 @@ class TestOAuthRoute(OAuthRoute):
 
     async def get_account_info(self, access_token: str) -> Dict[str, str]:
         """Get account info mock."""
-        return {"id": auth_account_id, "name": "Test", "image": "link", "url": "link"}
+        return {"id": AUTH_ACCOUNT_ID, "name": "Test", "image": "link", "url": "link"}
 
 
 def get_patched_route() -> TestOAuthRoute:
+    """Create patched test route."""
     route = TestOAuthRoute(endpoint=endpoint_logic, path="test")
 
     return route
 
 
 async def get_auth_request(user_id: Optional[str] = None) -> Request:
+    """Create test request."""
     request_scope = {
         "type": "http",
         "query_params": QueryParams(code="test"),
@@ -88,7 +90,7 @@ async def test_create_tokens_check_schema(set_mock: MagicMock) -> None:
     set_mock.return_value = asyncio.Future()
     set_mock.return_value.set_result(True)
 
-    tokens: Dict[str, Union[str, int]] = await create_tokens(user_id=str(user_uuid))
+    tokens: Dict[str, Union[str, int]] = await create_tokens(user_id=str(USER_UUID))
 
     assert AuthOut(**tokens).validate(tokens)  # type: ignore
 
@@ -96,10 +98,11 @@ async def test_create_tokens_check_schema(set_mock: MagicMock) -> None:
 @pytest.mark.asyncio
 @mock.patch("app.extensions.redis_client.set")
 async def test_create_tokens_check_tokens(set_mock: MagicMock) -> None:
+    """Check created tokens and encoded data in them."""
     set_mock.return_value = asyncio.Future()
     set_mock.return_value.set_result(True)
 
-    tokens: Dict[str, Any] = await create_tokens(user_id=str(user_uuid))
+    tokens: Dict[str, Any] = await create_tokens(user_id=str(USER_UUID))
 
     access_token: str = tokens["access_token"]
     refresh_token: str = tokens["refresh_token"]
@@ -110,7 +113,7 @@ async def test_create_tokens_check_tokens(set_mock: MagicMock) -> None:
         jwt=refresh_token, key=JWT_SECRET, algorithms=[JWT_ALGORITHM]
     )
 
-    assert access_token_data.get("user_id") == str(user_uuid)
+    assert access_token_data.get("user_id") == str(USER_UUID)
     assert refresh_token_data.get("access_token") == access_token
 
 
@@ -130,7 +133,7 @@ async def test_base_auth_route(set_mock: MagicMock) -> None:
 
     response: ORJSONResponse = await route_handler(request)
     response_body = loads(response.body)
-    auth_account: AuthAccount = await AuthAccount.get(id=auth_account_id)
+    auth_account: AuthAccount = await AuthAccount.get(id=AUTH_ACCOUNT_ID)
     user: User = await User.get(auth_accounts__in=[auth_account])
 
     assert AuthOut(**response_body).validate(response_body)
@@ -150,7 +153,7 @@ async def test_logout(delete_mock: MagicMock, get_mock: MagicMock, set_mock: Mag
     delete_mock.return_value.set_result(True)
     set_mock.return_value = asyncio.Future()
     set_mock.return_value.set_result(True)
-    tokens: Dict[str, Any] = await create_tokens(user_id=str(user_uuid))
+    tokens: Dict[str, Any] = await create_tokens(user_id=str(USER_UUID))
     access_token: str = tokens["access_token"]
     refresh_token: str = tokens["refresh_token"]
     get_mock.return_value = asyncio.Future()
@@ -168,7 +171,7 @@ async def test_logout(delete_mock: MagicMock, get_mock: MagicMock, set_mock: Mag
 @mock.patch("app.extensions.redis_client.get")
 @mock.patch("app.extensions.redis_client.delete")
 async def test_refresh_tokens(
-    delete_mock: MagicMock, get_mock: MagicMock, set_mock: MagicMock
+        delete_mock: MagicMock, get_mock: MagicMock, set_mock: MagicMock
 ) -> None:
     """
     Test tokens refreshing
@@ -178,10 +181,10 @@ async def test_refresh_tokens(
     set_mock.return_value = asyncio.Future()
     set_mock.return_value.set_result(True)
 
-    tokens: Dict[str, Any] = await create_tokens(user_id=str(user_uuid))
+    tokens: Dict[str, Any] = await create_tokens(user_id=str(USER_UUID))
     get_mock.return_value = asyncio.Future()
     get_mock.return_value.set_result(
-        dumps({"access_token": tokens["access_token"], "user_id": str(user_uuid)})
+        dumps({"access_token": tokens["access_token"], "user_id": str(USER_UUID)})
     )
     refresh_token: str = tokens["refresh_token"]
 
@@ -190,4 +193,3 @@ async def test_refresh_tokens(
     )
 
     assert AuthOut(**new_tokens).validate(new_tokens)  # type: ignore
-

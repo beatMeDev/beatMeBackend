@@ -57,12 +57,11 @@ class SpotifyAuth(OAuthRoute):
 
         profile_info = response.json()
 
+        profile_image: str = profile_info["images"][-1]["url"] if profile_info.get("images") else ""
         formatted_data = {
             "id": str(profile_info.get("id")),
             "name": profile_info.get("display_name"),
-            "image": profile_info.get("images", [])[-1].get("url")
-            if profile_info.get("images", [])
-            else "",
+            "image": profile_image,
             "url": profile_info.get("external_urls", {}).get("spotify"),
         }
 

@@ -1,3 +1,4 @@
+"""Auth middleware"""
 from typing import Any
 from typing import Dict
 from typing import Optional
@@ -19,8 +20,9 @@ from app.utils.exceptions import UnauthorizedError
 
 
 class TokenAuthMiddleware(BaseHTTPMiddleware):
+    """Check user credentials."""
     async def dispatch(
-        self, request: Request, call_next: RequestResponseEndpoint
+            self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
         authorization: str = request.headers.get("Authorization")
 
