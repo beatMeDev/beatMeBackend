@@ -1,3 +1,4 @@
+"""External services settings"""
 from app.settings.base import config
 
 

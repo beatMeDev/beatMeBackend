@@ -1,3 +1,4 @@
+"""Test pre running stuff"""
 from typing import AsyncGenerator
 
 import pytest
@@ -12,7 +13,8 @@ from app.settings import TORTOISE_TEST_DB
 
 @pytest.fixture(scope="function", autouse=True)
 @pytest.mark.asyncio
-async def db() -> AsyncGenerator:  # type: ignore
+async def test_db() -> AsyncGenerator:  # type: ignore
+    """Initialize db connection before run test."""
     try:
         await Tortoise.init(db_url=TORTOISE_TEST_DB, modules={"models": APP_MODELS})
     except DBConnectionError:

@@ -165,9 +165,10 @@ async def create_tokens(user_id: str) -> Dict[str, Union[str, int]]:
 
 
 async def bearer_auth(
-    request: Request,
-    http_credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),  # pylint: disable=unused-argument
+        request: Request,
+        http_credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),  # pylint: disable=unused-argument
 ) -> Optional[str]:
+    """Auth dependence."""
     token_data: Dict[str, str] = request.scope.get("token_data", {})
     user_id: Optional[str] = token_data.get("user_id")
 
