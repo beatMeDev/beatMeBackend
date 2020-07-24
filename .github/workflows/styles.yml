@@ -17,11 +17,9 @@ jobs:
       id: cache-packages
       with:
         path: .venv
-        key: venv-${{ runner.os }}-py-${{ python-version }}-poetry-${{ hashFiles('poetry.lock') }}
+        key: venv-${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
         restore-keys: |
-          venv-${{ runner.os }}-py-${{ python-version }}-poetry-
-          venv-${{ runner.os }}-py-${{ python-version }}-
-          venv-${{ runner.os }}-py-
+          venv-${{ runner.os }}-poetry-
           venv-${{ runner.os }}-
     - name: Install dependencies
       if: steps.cache-packages.outputs.cache-hit != 'true'
