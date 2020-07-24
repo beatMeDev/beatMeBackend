@@ -2,7 +2,7 @@ name: tests
 on: [push, pull_request]
 
 jobs:
-  pytest:
+  tests:
     name: tests
     runs-on: ubuntu-latest
     steps:
@@ -10,7 +10,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python_version: 3.8.4
+        python-version: 3.8.4
     - name: Install poetry
       run: pip install poetry==1.0.10
     - uses: actions/cache@v2
