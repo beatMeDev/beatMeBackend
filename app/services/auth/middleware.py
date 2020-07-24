@@ -6,7 +6,7 @@ import jwt
 
 from fastapi.responses import ORJSONResponse
 from fastapi.security.utils import get_authorization_scheme_param
-from orjson import loads
+from orjson import loads  # pylint: disable-msg=E0611
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.base import RequestResponseEndpoint
 from starlette.requests import Request
@@ -27,7 +27,7 @@ class TokenAuthMiddleware(BaseHTTPMiddleware):
         if not authorization:
             return await call_next(request)
 
-        scheme, token = get_authorization_scheme_param(authorization)
+        scheme, token = get_authorization_scheme_param(authorization)  # pylint: disable=unused-variable
 
         if not token:
             return await call_next(request)

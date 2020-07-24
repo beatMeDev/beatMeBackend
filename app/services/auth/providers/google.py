@@ -15,6 +15,7 @@ from app.utils.exceptions import UnauthorizedError
 
 
 class GoogleAuth(OAuthRoute):
+    """Google auth integration"""
     provider = AuthProvider.GOOGLE
     auth_endpoint = "https://oauth2.googleapis.com/token"
     account_endpoint = "https://www.googleapis.com/oauth2/v3/userinfo"

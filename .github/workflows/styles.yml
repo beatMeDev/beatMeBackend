@@ -1,9 +1,9 @@
-name: tests
+name: styles
 on: [push, pull_request]
 
 jobs:
   pytest:
-    name: tests
+    name: styles
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@main
@@ -31,4 +31,4 @@ jobs:
     - name: Run tests
       - run: |
         source .venv/bin/activate
-        ./scripts/tests
+        ./scripts/styles

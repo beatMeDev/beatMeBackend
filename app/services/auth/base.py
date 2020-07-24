@@ -1,5 +1,5 @@
 """
-Base test_auth test_services
+Base auth services
 """
 from datetime import datetime
 from datetime import timedelta
@@ -16,8 +16,8 @@ from fastapi.responses import ORJSONResponse
 from fastapi.routing import APIRoute
 from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.security import HTTPBearer
-from orjson import dumps
-from orjson import loads
+from orjson import dumps  # pylint: disable-msg=E0611
+from orjson import loads  # pylint: disable-msg=E0611
 from starlette.requests import Request
 from starlette.responses import Response
 
@@ -166,7 +166,7 @@ async def create_tokens(user_id: str) -> Dict[str, Union[str, int]]:
 
 async def bearer_auth(
     request: Request,
-    http_credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),
+    http_credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),  # pylint: disable=unused-argument
 ) -> Optional[str]:
     token_data: Dict[str, str] = request.scope.get("token_data", {})
     user_id: Optional[str] = token_data.get("user_id")
