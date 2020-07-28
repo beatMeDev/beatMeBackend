@@ -468,7 +468,7 @@ python-versions = "*"
 version = "3.3"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Python HTTP for Humans."
 name = "requests"
 optional = false
@@ -565,7 +565,7 @@ python-versions = "*"
 version = "3.7.4.2"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 name = "urllib3"
 optional = false
@@ -629,7 +629,7 @@ python-versions = "*"
 version = "1.12.1"
 
 [metadata]
-content-hash = "71c27b8b12f66cd691a54486501f726d1e2f06b9eccdfe75a2a963439ea0480a"
+content-hash = "a0baa67747fd46ee6f790a6e43e50ca2f04543aa91bcf19d92a13a6db2a851f5"
 python-versions = "^3.8"
 
 [metadata.files]
