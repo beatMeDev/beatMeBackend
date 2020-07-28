@@ -31,15 +31,18 @@ class AuthAccount(models.Model):
     """Auth account model."""
     _id = fields.UUIDField(pk=True)
     id = fields.CharField(max_length=255, null=False)
-    access_token = fields.CharField(max_length=1024, null=True)
     name = fields.CharField(max_length=255, null=True)
     image = fields.CharField(max_length=2048, null=True)
     url = fields.CharField(max_length=2048, null=True)
     provider = fields.CharEnumField(AuthProvider, default=None)
 
+    access_token = fields.CharField(max_length=1024, null=True)
+    refresh_token = fields.CharField(max_length=1024, null=True)
+    expires = fields.IntField(null=True)
+
     class PydanticMeta:  # pylint: disable=too-few-public-methods
         """Serializations options."""
-        exclude = ("access_token",)
+        exclude = ("access_token", "refresh_token", "expires",)
 
 
 Tortoise.init_models(["app.models.db.user"], "models")  # pydantic schema hack

@@ -1,9 +1,10 @@
 """
 Facebook OAuth integration
 """
-from typing import Dict
+from datetime import datetime
+from typing import Dict, Tuple
 
-from httpx import HTTPError
+from httpx import HTTPError, Response
 
 from app.extensions import http_client
 from app.models.db.user import AuthProvider
@@ -23,14 +24,14 @@ class FacebookAuth(OAuthRoute):
     )
     account_endpoint = f"https://graph.facebook.com/{FACEBOOK_API_VERSION}/me/"
 
-    async def code_auth(self, code: str) -> str:
-        params = {
+    async def code_auth(self, code: str) -> Tuple[str, str, int]:
+        params: Dict[str, str] = {
             "code": code,
             "redirect_uri": FACEBOOK_REDIRECT_URI,
             "client_secret": FACEBOOK_SECRET,
             "client_id": FACEBOOK_ID,
         }
-        response = await http_client.get(url=self.auth_endpoint, params=params)
+        response: Response = await http_client.get(url=self.auth_endpoint, params=params)
 
         try:
             response.raise_for_status()
@@ -38,9 +39,12 @@ class FacebookAuth(OAuthRoute):
             raise UnauthorizedError
 
         auth_data = response.json()
+        now_seconds = int(datetime.utcnow().timestamp())
         access_token: str = auth_data["access_token"]
+        refresh_token: str = ""
+        expires: int = now_seconds + int(auth_data["expires_in"])
 
-        return access_token
+        return access_token, refresh_token, expires
 
     async def get_account_info(self, access_token: str) -> Dict[str, str]:
         params = {

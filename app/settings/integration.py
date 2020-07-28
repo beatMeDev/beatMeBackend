@@ -14,6 +14,7 @@ GOOGLE_REDIRECT_URI: str = config("GOOGLE_REDIRECT_URI", cast=str, default="")
 SPOTIFY_ID: str = config("SPOTIFY_ID", cast=str, default="")
 SPOTIFY_SECRET: str = config("SPOTIFY_SECRET", cast=str, default="")
 SPOTIFY_REDIRECT_URI: str = config("SPOTIFY_REDIRECT_URI", cast=str, default="")
+SPOTIFY_API: str = config("SPOTIFY_API", cast=str, default="https://api.spotify.com/v1/")
 
 VK_ID: int = config("VK_ID", cast=int, default=0)
 VK_SECRET: str = config("VK_SECRET", cast=str, default="")
