@@ -17,6 +17,7 @@ pyJWT = "^1.7.1"
 orjson = "^3.2.1"
 httpx = "^0.13.3"
 python-decouple = "^3.3"
+requests = "^2.24.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.4.3"
