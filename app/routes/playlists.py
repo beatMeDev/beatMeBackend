@@ -1,11 +1,14 @@
 """Playlist endpoints"""
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
+from fastapi import Depends
 from tortoise.contrib.pydantic import PydanticModel
 
-from app.models.api.playlist import PlaylistOut, PlaylistIn
+from app.models.api.playlist import PlaylistIn
+from app.models.api.playlist import PlaylistOut
 from app.models.db import Playlist
 from app.services.auth.providers.spotify import spotify_auth
 from app.services.playlists import create_playlist
+
 
 playlists_router = APIRouter()  # pylint: disable-msg=C0103
 

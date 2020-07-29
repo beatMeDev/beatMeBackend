@@ -14,9 +14,10 @@ from tortoise.contrib.fastapi import register_tortoise
 
 from app.extensions import redis_client
 from app.routes.auth import auth_router
-from app.routes.playlists import playlists_router
-from app.routes.users import router as users_route
 from app.routes.challenges import challenges_router
+from app.routes.playlists import playlists_router
+from app.routes.tracks import tracks_router
+from app.routes.users import router as users_route
 from app.services.auth.middleware import TokenAuthMiddleware
 from app.settings import REDIS_DB
 from app.settings import REDIS_HOST
@@ -47,6 +48,7 @@ def get_application() -> FastAPI:
     router.include_router(users_route, prefix="/users", tags=["Users"])
     router.include_router(playlists_router, prefix="/playlists", tags=["Playlists"])
     router.include_router(challenges_router, prefix="/challenges", tags=["Challenges"])
+    router.include_router(tracks_router, prefix="/tracks", tags=["Tracks"])
     app.include_router(router, prefix="/api")
 
     # Middleware section

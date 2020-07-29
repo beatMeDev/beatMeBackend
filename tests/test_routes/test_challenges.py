@@ -16,7 +16,7 @@ requests: List[Tuple[str, str, Dict[str, str], int]] = [
 ]
 
 
-@pytest.mark.parametrize("method,endpoint,data,expected_status", requests)
+@pytest.mark.parametrize("method,endpoint,data,expected_status", requests)  # pylint: disable=not-callable
 def test_endpoint_exists(
         method: str, endpoint: str, data: Dict[str, str], expected_status: int
 ) -> None:

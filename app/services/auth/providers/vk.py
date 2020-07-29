@@ -1,7 +1,9 @@
 """
 VK OAuth integration
 """
-from typing import Dict, Tuple, Any
+from typing import Any
+from typing import Dict
+from typing import Tuple
 
 from httpx import HTTPError
 from httpx import Response

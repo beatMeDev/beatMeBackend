@@ -1,12 +1,20 @@
 """Spotify services"""
 import re
-from typing import Dict, List, Any, Tuple, Optional
 
-from httpx import Response, HTTPError
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+
+from httpx import HTTPError
+from httpx import Response
 
 from app.extensions import http_client
 from app.settings import SPOTIFY_API
-from app.utils.exceptions import UnauthorizedError, NotFoundError
+from app.utils.exceptions import NotFoundError
+from app.utils.exceptions import UnauthorizedError
+
 
 playlist_id_regex = re.compile(r"playlist.\w+")
 playlist_regex = re.compile(r"playlist.")

@@ -3,10 +3,11 @@ Base auth services
 """
 from datetime import datetime
 from datetime import timedelta
-from typing import Any, Tuple
+from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import Optional
+from typing import Tuple
 from typing import Union
 
 import jwt

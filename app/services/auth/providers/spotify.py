@@ -3,15 +3,20 @@ Spotify OAuth integration
 """
 from base64 import b64encode
 from datetime import datetime
-from typing import Dict, Tuple, Optional
+from typing import Dict
+from typing import Optional
+from typing import Tuple
 
 from fastapi import Depends
-from httpx import HTTPError, Response
+from httpx import HTTPError
+from httpx import Response
 from starlette.requests import Request
 
 from app.extensions import http_client
-from app.models.db.user import AuthProvider, AuthAccount
-from app.services.auth.base import OAuthRoute, bearer_auth
+from app.models.db.user import AuthAccount
+from app.models.db.user import AuthProvider
+from app.services.auth.base import OAuthRoute
+from app.services.auth.base import bearer_auth
 from app.settings import SPOTIFY_ID
 from app.settings import SPOTIFY_REDIRECT_URI
 from app.settings import SPOTIFY_SECRET

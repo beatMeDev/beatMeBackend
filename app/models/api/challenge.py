@@ -1,13 +1,18 @@
 # pylint: skip-file
 """Challenge pydantic schemas"""
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import Any
+from typing import Dict
+from typing import List
 from uuid import UUID
 
-from pydantic import BaseModel, validator
-from tortoise.contrib.pydantic import pydantic_model_creator, pydantic_queryset_creator
+from pydantic import BaseModel
+from pydantic import validator
+from tortoise.contrib.pydantic import pydantic_model_creator
+from tortoise.contrib.pydantic import pydantic_queryset_creator
 
 from app.models.db.challenge import Challenge
+
 
 ChallengeOut = pydantic_model_creator(Challenge, name="Challenge")
 ChallengeList = pydantic_queryset_creator(Challenge, name="Challenge")

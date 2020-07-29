@@ -1,20 +1,27 @@
 """Challenges endpoints"""
-from typing import Dict, Any, Optional
+from typing import Any
+from typing import Dict
+from typing import Optional
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
+from fastapi import Depends
 from tortoise.contrib.pydantic import PydanticModel
 
-from app.models.api.challenge import ChallengeIn, ChallengeOut, ChallengeListOut, ChallengeList
+from app.models.api.challenge import ChallengeIn
+from app.models.api.challenge import ChallengeList
+from app.models.api.challenge import ChallengeListOut
+from app.models.api.challenge import ChallengeOut
 from app.models.db import Challenge
 from app.services.auth.base import bearer_auth
 from app.utils.db import Paginate
+
 
 challenges_router = APIRouter()  # pylint: disable-msg=C0103
 
 
 @challenges_router.post("/", response_model=ChallengeOut)
-async def create_playlist_route(
+async def create_challenge_route(
         challenge_data: ChallengeIn,
         user_id: str = Depends(bearer_auth)
 ) -> PydanticModel:

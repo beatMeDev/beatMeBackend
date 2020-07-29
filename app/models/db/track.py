@@ -1,5 +1,6 @@
 """Track models"""
-from tortoise import fields, Tortoise
+from tortoise import Tortoise
+from tortoise import fields
 from tortoise import models
 
 
@@ -24,6 +25,10 @@ class Track(models.Model):
 
     recommended = fields.BooleanField(null=True, default=False)
     meta = fields.JSONField()
+
+    class PydanticMeta:  # pylint: disable=too-few-public-methods
+        """Serializations options."""
+        exclude = ("challenges", )
 
 
 Tortoise.init_models(["app.models.db.track"], "models")  # pydantic schema hack

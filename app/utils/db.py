@@ -1,13 +1,17 @@
 """Base database utils"""
 from asyncio import gather
-from typing import Tuple, List, Type
+from typing import List
+from typing import Tuple
+from typing import Type
 
 from fastapi import Query
 from tortoise import QuerySet
-from tortoise.contrib.pydantic import PydanticListModel, PydanticModel
+from tortoise.contrib.pydantic import PydanticListModel
+from tortoise.contrib.pydantic import PydanticModel
 from tortoise.models import MODEL
 
-from app.settings import PAGE_LIMIT, PAGE_MAX_LIMIT
+from app.settings import PAGE_LIMIT
+from app.settings import PAGE_MAX_LIMIT
 
 
 class Paginate:  # pylint: disable=too-few-public-methods

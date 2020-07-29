@@ -1,6 +1,7 @@
 """User models"""
 from enum import Enum
-from typing import Iterator, List
+from typing import Iterator
+from typing import List
 
 from tortoise import fields
 from tortoise import models

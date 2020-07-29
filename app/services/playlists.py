@@ -2,7 +2,8 @@
 from typing import Optional
 
 from app.models.db.playlist import Playlist
-from app.services.spotify import get_playlist_id, get_playlist_info
+from app.services.spotify import get_playlist_id
+from app.services.spotify import get_playlist_info
 from app.services.tracks import add_tracks_to_playlist
 from app.utils.exceptions import BadRequestError
 

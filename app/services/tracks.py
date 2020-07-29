@@ -1,5 +1,8 @@
 """Track services"""
-from typing import Dict, Any, List, Optional
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
 
 from app.models.db.playlist import Playlist
 from app.models.db.track import Track

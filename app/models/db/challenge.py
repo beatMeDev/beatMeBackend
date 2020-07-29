@@ -1,12 +1,17 @@
 """Challenge models"""
-from datetime import datetime, timedelta
-from typing import Optional, Dict
+from datetime import datetime
+from datetime import timedelta
+from typing import Dict
+from typing import Optional
 
 import jwt
-from tortoise import fields, Tortoise
+
+from tortoise import Tortoise
+from tortoise import fields
 from tortoise import models
 
-from app.settings import JWT_ALGORITHM, ITEM_SECRET
+from app.settings import ITEM_SECRET
+from app.settings import JWT_ALGORITHM
 from app.utils.exceptions import PermissionsDeniedError
 
 

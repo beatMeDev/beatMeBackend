@@ -2,9 +2,11 @@
 Google OAuth integration
 """
 from datetime import datetime
-from typing import Dict, Tuple
+from typing import Dict
+from typing import Tuple
 
-from httpx import HTTPError, Response
+from httpx import HTTPError
+from httpx import Response
 
 from app.extensions import http_client
 from app.models.db.user import AuthProvider
