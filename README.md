@@ -15,9 +15,10 @@
 - [x] Playlists
 - [x] Import playlists from *spotify*
 - [x] Tracks
-- [ ] Participants
+- [x] Participants
 - [ ] Submissions
 - [ ] Voting
+- [ ] Challenge statistics/scoreboard
 - [ ] Search track on youtube
 - [ ] Populate recommended playlists
 

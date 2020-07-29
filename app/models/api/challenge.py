@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Any
 from typing import Dict
 from typing import List
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -15,7 +16,7 @@ from app.models.db.challenge import Challenge
 
 
 ChallengeOut = pydantic_model_creator(Challenge, name="Challenge")
-ChallengeList = pydantic_queryset_creator(Challenge, name="Challenge")
+ChallengeList = pydantic_queryset_creator(Challenge, name="ChallengeList")
 
 
 class ChallengeListOut(BaseModel):
@@ -32,14 +33,37 @@ class ChallengeIn(BaseModel):
     track_id: UUID
 
     @validator("vote_end")
-    def challenge_end_greater(cls, value: datetime, values: Dict[str, Any]) -> datetime:
-        """Validate challenge end date."""
-        challenge_end = values["challenge_end"]
+    def vote_end_greater_end_data(cls, value: datetime, values: Dict[str, Any]) -> datetime:
+        """Validate vote end date."""
+        challenge_end: Optional[datetime] = values.get("challenge_end")
+
+        if not challenge_end:
+            return value
 
         if value > challenge_end:
             return value
 
         raise ValueError("must be greater than `challenge_end`")
+
+    @validator("vote_end")
+    def vote_end_greater_now(cls, value: datetime) -> datetime:
+        """Validate vote end date."""
+        now = datetime.utcnow()
+
+        if now <= value.replace(tzinfo=None):
+            return value
+
+        raise ValueError("must be greater than `now`")
+
+    @validator("challenge_end")
+    def challenge_end_greater_now(cls, value: datetime) -> datetime:
+        """Validate challenge end date."""
+        now = datetime.utcnow()
+
+        if now <= value.replace(tzinfo=None):
+            return value
+
+        raise ValueError("must be greater than `now`")
 
     @validator("name")
     def name_exists(cls, value: str) -> str:

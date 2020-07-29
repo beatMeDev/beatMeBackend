@@ -23,7 +23,7 @@ class User(models.Model):
     """User model."""
     id = fields.UUIDField(pk=True)
     auth_accounts = fields.ManyToManyField(
-        "models.AuthAccount", related_name="users", through="users_auth_accounts"
+        "models.AuthAccount", related_name="users", through="users_auth_accounts",
     )
 
     def name(self) -> str:

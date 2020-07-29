@@ -53,7 +53,7 @@ class Challenge(models.Model):
     created_at = fields.DatetimeField(null=True, auto_now=True)
 
     participants = fields.ManyToManyField(
-        "models.User", related_name="challenges", through="participants_users"
+        "models.User", related_name="challenges", through="challenges_participants"
     )
 
     def secret_key(self) -> Optional[str]:
