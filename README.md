@@ -14,12 +14,12 @@
 - [x] Challenges
 - [x] Playlists
 - [x] Import playlists from *spotify*
-- [ ] Tracks
-- [ ] Find track on youtube
-- [ ] Populate recommended playlists
+- [x] Tracks
 - [ ] Participants
 - [ ] Submissions
 - [ ] Voting
+- [ ] Search track on youtube
+- [ ] Populate recommended playlists
 
 ## Installation
 
