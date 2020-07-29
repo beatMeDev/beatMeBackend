@@ -1,7 +1,9 @@
 """
 VK OAuth integration
 """
+from typing import Any
 from typing import Dict
+from typing import Tuple
 
 from httpx import HTTPError
 from httpx import Response
@@ -22,15 +24,15 @@ class VKAuth(OAuthRoute):
     auth_endpoint = "https://oauth.vk.com/access_token"
     account_endpoint = "https://api.vk.com/method/users.get"
 
-    async def code_auth(self, code: str) -> str:
-        data = {
+    async def code_auth(self, code: str) -> Tuple[str, str, int]:
+        data: Dict[str, Any] = {
             "code": code,
             "client_id": VK_ID,
             "client_secret": VK_SECRET,
             "redirect_uri": VK_REDIRECT_URI,
             "v": VK_API_VERSION,
         }
-        response = await http_client.post(url=self.auth_endpoint, data=data)
+        response: Response = await http_client.post(url=self.auth_endpoint, data=data)
 
         try:
             response.raise_for_status()
@@ -39,8 +41,10 @@ class VKAuth(OAuthRoute):
 
         auth_data = response.json()
         access_token: str = auth_data["access_token"]
+        refresh_token: str = ""
+        expires: int = auth_data["expires_in"]
 
-        return access_token
+        return access_token, refresh_token, expires
 
     async def get_account_info(self, access_token: str) -> Dict[str, str]:
         params = {

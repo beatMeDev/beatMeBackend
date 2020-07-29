@@ -11,15 +11,15 @@
 ## TODO
 
 - [x] Authentication - Facebook, Google, Spotify, VK
-- [ ] Tracks
-- [ ] Playlists
-- [ ] Import playlists from *spotify*
-- [ ] Find track on youtube
-- [ ] Populate recommended playlists
-- [ ] Challenges
+- [x] Challenges
+- [x] Playlists
+- [x] Import playlists from *spotify*
+- [x] Tracks
 - [ ] Participants
 - [ ] Submissions
 - [ ] Voting
+- [ ] Search track on youtube
+- [ ] Populate recommended playlists
 
 ## Installation
 

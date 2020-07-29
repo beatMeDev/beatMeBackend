@@ -2,7 +2,7 @@
 
 import asyncio
 
-from typing import Any
+from typing import Any, Tuple
 from typing import Dict
 from typing import Optional
 from typing import Union
@@ -44,13 +44,13 @@ class TestOAuthRoute(OAuthRoute):
 
     __test__ = False
 
-    async def code_auth(self, code: str) -> str:
+    async def code_auth(self, code: str) -> Tuple[str, str, int]:
         """
         Code test_auth mock.
         :param code: test_auth code
         :return: mock value
         """
-        return "access_token"
+        return "access_token", "refresh_token", 1000000
 
     async def get_account_info(self, access_token: str) -> Dict[str, str]:
         """Get account info mock."""

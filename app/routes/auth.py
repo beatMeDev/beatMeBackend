@@ -19,7 +19,7 @@ from app.services.auth.base import refresh_tokens
 
 
 async def process_auth_route(code: str) -> None:  # pylint: disable=unused-argument
-    """Process test_auth test_routes"""
+    """Process auth routes"""
     ...
 
 

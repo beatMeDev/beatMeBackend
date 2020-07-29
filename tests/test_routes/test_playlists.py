@@ -1,4 +1,4 @@
-"""Test auth endpoints"""
+"""Test playlists endpoints"""
 from typing import List, Tuple, Dict
 
 import pytest
@@ -9,12 +9,7 @@ from app import application
 client: TestClient = TestClient(application)
 
 requests: List[Tuple[str, str, Dict[str, str], int]] = [
-    ("POST", "/api/auth/facebook/", {}, 422),
-    ("POST", "/api/auth/google/", {}, 422),
-    ("POST", "/api/auth/spotify/", {}, 422),
-    ("POST", "/api/auth/vk/", {}, 422),
-    ("POST", "/api/auth/logout/", {}, 403),
-    ("POST", "/api/auth/refresh/", {}, 403),
+    ("POST", "/api/playlists/", {}, 403),
 ]
 
 

@@ -7,6 +7,7 @@ from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import Optional
+from typing import Tuple
 from typing import Union
 
 import jwt
@@ -44,11 +45,11 @@ class OAuthRoute(APIRoute):
     auth_endpoint: str = ""
     account_endpoint: str = ""
 
-    async def code_auth(self, code: str) -> str:
+    async def code_auth(self, code: str) -> Tuple[str, str, int]:
         """
         Exchange code to access token
         :param code: authorization code
-        :return: access token
+        :return: access token, refresh token, when token expires in timestamp
         """
         raise NotImplementedError
 
@@ -68,15 +69,19 @@ class OAuthRoute(APIRoute):
 
             user_id: Optional[str] = request.scope.get("user_id")
             code: str = request.query_params.get("code")
-            access_token: str = await self.code_auth(code=code)
-            account_info: Dict[str, str] = await self.get_account_info(
+            access_token, refresh_token, expires = await self.code_auth(code=code)
+            account_info: Dict[str, Any] = await self.get_account_info(
                 access_token=access_token
             )
             account_info["provider"] = self.provider
             account_info["access_token"] = access_token
+            account_info["refresh_token"] = refresh_token
+            account_info["expires"] = expires
+
             account_created: bool = False
             user_created: bool = False
-            auth_account: AuthAccount = await AuthAccount.filter(
+
+            auth_account: Optional[AuthAccount] = await AuthAccount.filter(
                 id=account_info["id"]
             ).first()
 
@@ -88,9 +93,9 @@ class OAuthRoute(APIRoute):
                 account_created = True
 
             if user_id and account_created:
-                user: User = await User.get(id=user_id)
+                user = await User.get(id=user_id)
             elif not user_id and not account_created:
-                user = await User.filter(auth_accounts__in=[auth_account]).first()
+                user = await User.filter(auth_accounts__in=[auth_account]).first()  # type: ignore
             else:
                 user = await User.create()
                 user_created = True
