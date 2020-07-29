@@ -13,7 +13,7 @@ playlists_router = APIRouter()  # pylint: disable-msg=C0103
 @playlists_router.post("/", response_model=PlaylistOut)
 async def create_playlist_route(
         playlist_data: PlaylistIn,
-        access_token: str = Depends(spotify_auth)
+        access_token: str = Depends(spotify_auth),
 ) -> PydanticModel:
     """
     Create spotify playlist.

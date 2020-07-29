@@ -11,12 +11,12 @@
 ## TODO
 
 - [x] Authentication - Facebook, Google, Spotify, VK
+- [x] Challenges
+- [x] Playlists
+- [x] Import playlists from *spotify*
 - [ ] Tracks
-- [ ] Playlists
-- [ ] Import playlists from *spotify*
 - [ ] Find track on youtube
 - [ ] Populate recommended playlists
-- [ ] Challenges
 - [ ] Participants
 - [ ] Submissions
 - [ ] Voting

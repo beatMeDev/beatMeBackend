@@ -1,5 +1,5 @@
 """Track models"""
-from tortoise import fields
+from tortoise import fields, Tortoise
 from tortoise import models
 
 
@@ -24,3 +24,6 @@ class Track(models.Model):
 
     recommended = fields.BooleanField(null=True, default=False)
     meta = fields.JSONField()
+
+
+Tortoise.init_models(["app.models.db.track"], "models")  # pydantic schema hack
