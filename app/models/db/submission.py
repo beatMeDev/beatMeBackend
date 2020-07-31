@@ -1,5 +1,6 @@
 """Submission models."""
-from tortoise import fields, Tortoise
+from tortoise import Tortoise
+from tortoise import fields
 
 from app.models.db.base import BaseModel
 
@@ -11,6 +12,9 @@ class Submission(BaseModel):
 
     challenge = fields.ForeignKeyField("models.Challenge", related_name="submissions")
     user = fields.ForeignKeyField("models.User", related_name="submissions")
+
+    def __str__(self) -> str:
+        return str(self.url)
 
     class PydanticMeta:  # pylint: disable=too-few-public-methods
         """Serializations options."""

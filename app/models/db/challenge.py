@@ -83,8 +83,8 @@ class Challenge(BaseModel):
     class PydanticMeta:  # pylint: disable=too-few-public-methods
         """Serializations options."""
 
-        exclude = ("participants",)
-        computed = ("secret_key",)
+        exclude = ("participants", "submissions", "votes", )
+        computed = ("secret_key", )
         exclude_raw_fields = True
 
 

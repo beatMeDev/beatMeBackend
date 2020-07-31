@@ -4,6 +4,7 @@ Facebook OAuth integration
 from datetime import datetime
 from typing import Dict
 from typing import Tuple
+from urllib.parse import urlencode
 
 from httpx import HTTPError
 from httpx import Response
@@ -14,6 +15,7 @@ from app.services.auth.base import OAuthRoute
 from app.settings import FACEBOOK_API_VERSION
 from app.settings import FACEBOOK_ID
 from app.settings import FACEBOOK_REDIRECT_URI
+from app.settings import FACEBOOK_SCOPE
 from app.settings import FACEBOOK_SECRET
 from app.utils.exceptions import UnauthorizedError
 
@@ -26,6 +28,7 @@ class FacebookAuth(OAuthRoute):
         f"https://graph.facebook.com/{FACEBOOK_API_VERSION}/oauth/access_token"
     )
     account_endpoint = f"https://graph.facebook.com/{FACEBOOK_API_VERSION}/me/"
+    sign_in_endpoint = f"https://www.facebook.com/{FACEBOOK_API_VERSION}/dialog/oauth"
 
     async def code_auth(self, code: str) -> Tuple[str, str, int]:
         params: Dict[str, str] = {
@@ -75,3 +78,16 @@ class FacebookAuth(OAuthRoute):
         }
 
         return formatted_data
+
+    async def create_auth_link(self) -> str:
+        params: Dict[str, str] = {
+            "response_type": "code",
+            "client_id": FACEBOOK_ID,
+            "scope": FACEBOOK_SCOPE,
+            "redirect_uri": FACEBOOK_REDIRECT_URI,
+            "state": "{secure=off}",
+        }
+        query: str = urlencode(params)
+        url: str = f"{self.sign_in_endpoint}?{query}"
+
+        return url

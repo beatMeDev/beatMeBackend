@@ -8,3 +8,6 @@ class Text(BaseModel):
     """Text for loaders."""
 
     content = fields.TextField()
+
+    def __str__(self) -> str:
+        return self.content[:100]

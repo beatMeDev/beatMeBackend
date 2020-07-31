@@ -2,8 +2,9 @@
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from fastapi import Depends
+from fastapi import HTTPException
 from tortoise.contrib.pydantic import PydanticModel
 
 from app.models.api.vote import VoteIn

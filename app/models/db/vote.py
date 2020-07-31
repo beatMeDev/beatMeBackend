@@ -1,5 +1,6 @@
 """Vote models."""
-from tortoise import fields, Tortoise
+from tortoise import Tortoise
+from tortoise import fields
 
 from app.models.db.base import BaseModel
 

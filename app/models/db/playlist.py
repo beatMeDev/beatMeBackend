@@ -16,6 +16,9 @@ class Playlist(BaseModel):
         "models.Track", related_name="playlists", through="playlists_tracks"
     )
 
+    def __str__(self) -> str:
+        return str(self.name)
+
     class PydanticMeta:  # pylint: disable=too-few-public-methods
         """Serializations options."""
 

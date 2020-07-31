@@ -4,6 +4,7 @@ VK OAuth integration
 from typing import Any
 from typing import Dict
 from typing import Tuple
+from urllib.parse import urlencode
 
 from httpx import HTTPError
 from httpx import Response
@@ -14,6 +15,7 @@ from app.services.auth.base import OAuthRoute
 from app.settings import VK_API_VERSION
 from app.settings import VK_ID
 from app.settings import VK_REDIRECT_URI
+from app.settings import VK_SCOPE
 from app.settings import VK_SECRET
 from app.utils.exceptions import UnauthorizedError
 
@@ -24,6 +26,7 @@ class VKAuth(OAuthRoute):
     provider = AuthProvider.VK
     auth_endpoint = "https://oauth.vk.com/access_token"
     account_endpoint = "https://api.vk.com/method/users.get"
+    sign_in_endpoint = "https://oauth.vk.com/authorize"
 
     async def code_auth(self, code: str) -> Tuple[str, str, int]:
         data: Dict[str, Any] = {
@@ -81,3 +84,17 @@ class VKAuth(OAuthRoute):
         }
 
         return formatted_data
+
+    async def create_auth_link(self) -> str:
+        params: Dict[str, Any] = {
+            "response_type": "code",
+            "client_id": VK_ID,
+            "scope": VK_SCOPE,
+            "redirect_uri": VK_REDIRECT_URI,
+            "v": VK_API_VERSION,
+            "display": "page",
+        }
+        query: str = urlencode(params)
+        url: str = f"{self.sign_in_endpoint}?{query}"
+
+        return url

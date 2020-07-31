@@ -10,6 +10,7 @@ from tortoise.contrib.pydantic import pydantic_queryset_creator
 
 from app.models.db import Vote
 
+
 VoteOut = pydantic_model_creator(Vote, name="Vote")
 VoteList = pydantic_queryset_creator(Vote, name="VoteList")
 

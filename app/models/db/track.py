@@ -27,6 +27,9 @@ class Track(BaseModel):
     recommended = fields.BooleanField(null=True, default=False)
     meta = fields.JSONField()
 
+    def __str__(self) -> str:
+        return f"{self.author_name} - {self.name}"
+
     class PydanticMeta:  # pylint: disable=too-few-public-methods
         """Serializations options."""
 

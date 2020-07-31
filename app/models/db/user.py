@@ -53,6 +53,9 @@ class User(BaseModel):
             for auth_account in self.auth_accounts  # pylint: disable=not-an-iterable
         ]
 
+    def __str__(self) -> str:
+        return self.name()
+
     class PydanticMeta:  # pylint: disable=too-few-public-methods
         """Serializations options."""
 

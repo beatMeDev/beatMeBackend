@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Dict
 from typing import Optional
 from typing import Tuple
+from urllib.parse import urlencode
 
 from fastapi import Depends
 from httpx import HTTPError
@@ -19,6 +20,7 @@ from app.services.auth.base import OAuthRoute
 from app.services.auth.base import bearer_auth
 from app.settings import SPOTIFY_ID
 from app.settings import SPOTIFY_REDIRECT_URI
+from app.settings import SPOTIFY_SCOPE
 from app.settings import SPOTIFY_SECRET
 from app.utils.exceptions import UnauthorizedError
 
@@ -29,6 +31,7 @@ class SpotifyAuth(OAuthRoute):
     provider = AuthProvider.SPOTIFY
     auth_endpoint = "https://accounts.spotify.com/api/token"
     account_endpoint = "https://api.spotify.com/v1/me/"
+    sign_in_endpoint = "https://accounts.spotify.com/authorize"
 
     async def code_auth(self, code: str) -> Tuple[str, str, int]:
         authorization = b64encode(
@@ -80,6 +83,18 @@ class SpotifyAuth(OAuthRoute):
         }
 
         return formatted_data
+
+    async def create_auth_link(self) -> str:
+        params: Dict[str, str] = {
+            "response_type": "code",
+            "client_id": SPOTIFY_ID,
+            "scope": SPOTIFY_SCOPE,
+            "redirect_uri": SPOTIFY_REDIRECT_URI,
+        }
+        query: str = urlencode(params)
+        url: str = f"{self.sign_in_endpoint}?{query}"
+
+        return url
 
 
 async def spotify_auth(
