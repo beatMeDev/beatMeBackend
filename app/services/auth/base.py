@@ -20,6 +20,7 @@ from fastapi.security import HTTPBearer
 from orjson import dumps  # pylint: disable-msg=E0611
 from orjson import loads  # pylint: disable-msg=E0611
 from starlette.requests import Request
+from starlette.responses import RedirectResponse
 from starlette.responses import Response
 
 from app.extensions import redis_client
@@ -30,6 +31,7 @@ from app.settings import ACCESS_TOKEN_LIFETIME
 from app.settings import JWT_ALGORITHM
 from app.settings import JWT_SECRET
 from app.settings import REFRESH_TOKEN_LIFETIME
+from app.utils.exceptions import BadRequestError
 from app.utils.exceptions import UnauthorizedError
 
 
@@ -37,13 +39,14 @@ class OAuthRoute(APIRoute):
     """
     Base OAuth fastapi route class.
 
-    get_route_handler - main test_auth logic,
+    get_route_handler - main auth logic,
     code_auth and get_account_info should be implemented in third party providers.
     """
 
     provider = AuthProvider.DEFAULT
     auth_endpoint: str = ""
     account_endpoint: str = ""
+    sign_in_endpoint: str = ""
 
     async def code_auth(self, code: str) -> Tuple[str, str, int]:
         """
@@ -56,10 +59,70 @@ class OAuthRoute(APIRoute):
     async def get_account_info(self, access_token: str) -> Dict[str, str]:
         """
         Get profile information
-        :param access_token: test_auth service token
+        :param access_token: auth service token
         :return: profile information: {"id": "1", "name": "Test", "image": "link", "url": "link"}
         """
         raise NotImplementedError
+
+    async def create_auth_link(self) -> str:
+        """
+        Create link for user sign in on external provider.
+        :return: link
+        """
+        raise NotImplementedError
+
+    async def handle_post(self, request: Request) -> ORJSONResponse:
+        """On POST works sign in logic."""
+        code: Optional[str] = request.query_params.get("code")
+
+        if not code:
+            raise BadRequestError
+
+        user_id: Optional[str] = request.scope.get("user_id")
+        access_token, refresh_token, expires = await self.code_auth(code=code)
+        account_info: Dict[str, Any] = await self.get_account_info(
+            access_token=access_token
+        )
+        account_info["provider"] = self.provider
+        account_info["access_token"] = access_token
+        account_info["refresh_token"] = refresh_token
+        account_info["expires"] = expires
+
+        account_created: bool = False
+        user_created: bool = False
+
+        auth_account: Optional[AuthAccount] = await AuthAccount.filter(
+            _id=account_info["_id"]
+        ).first()
+
+        if auth_account:
+            await auth_account.update_from_dict(data=account_info)
+            await auth_account.save()
+        else:
+            auth_account = await AuthAccount.create(**account_info)
+            account_created = True
+
+        if user_id and account_created:
+            user = await User.get(id=user_id)
+        elif not user_id and not account_created:
+            user = await User.filter(auth_accounts__in=[auth_account]).first()  # type: ignore
+        else:
+            user = await User.create()
+            user_created = True
+
+        if account_created or user_created:
+            await user.auth_accounts.add(auth_account)
+
+        tokens: Dict[str, Union[str, int]] = await create_tokens(user_id=str(user.id))
+
+        return ORJSONResponse(tokens)
+
+    async def handle_get(self) -> RedirectResponse:
+        """On GET generating sign in link on external provider."""
+        link: str = await self.create_auth_link()
+        response: RedirectResponse = RedirectResponse(link)
+
+        return response
 
     def get_route_handler(self) -> Callable:  # type: ignore
         original_route_handler: Callable = super().get_route_handler()  # type: ignore
@@ -67,54 +130,20 @@ class OAuthRoute(APIRoute):
         async def custom_route_handler(request: Request) -> Response:
             await original_route_handler(request)
 
-            user_id: Optional[str] = request.scope.get("user_id")
-            code: str = request.query_params.get("code")
-            access_token, refresh_token, expires = await self.code_auth(code=code)
-            account_info: Dict[str, Any] = await self.get_account_info(
-                access_token=access_token
-            )
-            account_info["provider"] = self.provider
-            account_info["access_token"] = access_token
-            account_info["refresh_token"] = refresh_token
-            account_info["expires"] = expires
+            if request.method == "GET":
+                return await self.handle_get()
 
-            account_created: bool = False
-            user_created: bool = False
+            if request.method == "POST":
+                return await self.handle_post(request=request)
 
-            auth_account: Optional[AuthAccount] = await AuthAccount.filter(
-                id=account_info["id"]
-            ).first()
-
-            if auth_account:
-                await auth_account.update_from_dict(data=account_info)
-                await auth_account.save()
-            else:
-                auth_account = await AuthAccount.create(**account_info)
-                account_created = True
-
-            if user_id and account_created:
-                user = await User.get(id=user_id)
-            elif not user_id and not account_created:
-                user = await User.filter(auth_accounts__in=[auth_account]).first()  # type: ignore
-            else:
-                user = await User.create()
-                user_created = True
-
-            if account_created or user_created:
-                await user.auth_accounts.add(auth_account)
-
-            tokens: Dict[str, Union[str, int]] = await create_tokens(
-                user_id=str(user.id)
-            )
-
-            return ORJSONResponse(tokens)
+            raise BadRequestError
 
         return custom_route_handler
 
 
 async def create_tokens(user_id: str) -> Dict[str, Union[str, int]]:
     """
-    Create test_auth tokens
+    Create auth tokens
     :param user_id: user's id
     :return: tokens pair and access expire: {
                                                 "access_token": "str",
@@ -171,7 +200,9 @@ async def create_tokens(user_id: str) -> Dict[str, Union[str, int]]:
 
 async def bearer_auth(
         request: Request,
-        http_credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),  # pylint: disable=unused-argument
+        http_credentials: HTTPAuthorizationCredentials = Depends(
+            HTTPBearer()
+        ),  # pylint: disable=unused-argument
 ) -> Optional[str]:
     """Auth dependence."""
     token_data: Dict[str, str] = request.scope.get("token_data", {})

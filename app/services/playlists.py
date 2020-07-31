@@ -23,7 +23,7 @@ async def create_playlist(link: str, access_token: str) -> Playlist:
     playlist_info, tracks = await get_playlist_info(
         playlist_id=playlist_id, access_token=access_token
     )
-    playlist, _ = await Playlist.get_or_create(playlist_info)
+    playlist, _ = await Playlist.get_or_create(**playlist_info)  # type: ignore
     await add_tracks_to_playlist(playlist=playlist, tracks=tracks)
 
     return playlist

@@ -25,7 +25,9 @@ def format_track(track_info: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     if not track_id:
         return None
 
-    author_name: str = ", ".join([artist["name"] for artist in raw_track_data.get("artists", [])])
+    author_name: str = ", ".join(
+        [artist["name"] for artist in raw_track_data.get("artists", [])]
+    )
     track_name: Optional[str] = raw_track_data.get("name")
     cover_images: List[Dict[str, Any]] = raw_album_data.get("images", [])
     cover_image: Optional[str] = None
@@ -35,7 +37,7 @@ def format_track(track_info: Dict[str, Any]) -> Optional[Dict[str, Any]]:
 
     meta: Dict[str, Any] = {
         "album": raw_album_data.get("name"),
-        "duration": raw_track_data.get("duration_ms", 0) / 1000
+        "duration": raw_track_data.get("duration_ms", 0) / 1000,
     }
 
     track_data: Dict[str, Any] = {
@@ -51,7 +53,9 @@ def format_track(track_info: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     return track_data
 
 
-async def add_tracks_to_playlist(playlist: Playlist, tracks: List[Dict[str, Any]]) -> bool:
+async def add_tracks_to_playlist(
+        playlist: Playlist, tracks: List[Dict[str, Any]]
+) -> bool:
     """
     Add formatted tracks to playlist.
     :param playlist: Playlist object

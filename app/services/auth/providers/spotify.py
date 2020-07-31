@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Dict
 from typing import Optional
 from typing import Tuple
+from urllib.parse import urlencode
 
 from fastapi import Depends
 from httpx import HTTPError
@@ -19,20 +20,23 @@ from app.services.auth.base import OAuthRoute
 from app.services.auth.base import bearer_auth
 from app.settings import SPOTIFY_ID
 from app.settings import SPOTIFY_REDIRECT_URI
+from app.settings import SPOTIFY_SCOPE
 from app.settings import SPOTIFY_SECRET
 from app.utils.exceptions import UnauthorizedError
 
 
 class SpotifyAuth(OAuthRoute):
     """Spotify auth integration"""
+
     provider = AuthProvider.SPOTIFY
     auth_endpoint = "https://accounts.spotify.com/api/token"
     account_endpoint = "https://api.spotify.com/v1/me/"
+    sign_in_endpoint = "https://accounts.spotify.com/authorize"
 
     async def code_auth(self, code: str) -> Tuple[str, str, int]:
-        authorization = b64encode(f"{SPOTIFY_ID}:{SPOTIFY_SECRET}".encode("utf-8")).decode(
-            "utf-8"
-        )
+        authorization = b64encode(
+            f"{SPOTIFY_ID}:{SPOTIFY_SECRET}".encode("utf-8")
+        ).decode("utf-8")
         headers: Dict[str, str] = {"Authorization": f"Basic {authorization}"}
         data: Dict[str, str] = {
             "redirect_uri": SPOTIFY_REDIRECT_URI,
@@ -68,15 +72,29 @@ class SpotifyAuth(OAuthRoute):
 
         profile_info = response.json()
 
-        profile_image: str = profile_info["images"][-1]["url"] if profile_info.get("images") else ""
+        profile_image: str = profile_info["images"][-1]["url"] if profile_info.get(
+            "images"
+        ) else ""
         formatted_data = {
-            "id": str(profile_info.get("id")),
+            "_id": str(profile_info.get("id")),
             "name": profile_info.get("display_name"),
             "image": profile_image,
             "url": profile_info.get("external_urls", {}).get("spotify"),
         }
 
         return formatted_data
+
+    async def create_auth_link(self) -> str:
+        params: Dict[str, str] = {
+            "response_type": "code",
+            "client_id": SPOTIFY_ID,
+            "scope": SPOTIFY_SCOPE,
+            "redirect_uri": SPOTIFY_REDIRECT_URI,
+        }
+        query: str = urlencode(params)
+        url: str = f"{self.sign_in_endpoint}?{query}"
+
+        return url
 
 
 async def spotify_auth(
@@ -124,7 +142,9 @@ async def refresh_spotify_token(refresh_token: str) -> Tuple[str, str, int]:
     )
     headers: Dict[str, str] = {"Authorization": f"Basic {authorization}"}
 
-    response: Response = await http_client.post(url=refresh_url, data=data, headers=headers)
+    response: Response = await http_client.post(
+        url=refresh_url, data=data, headers=headers
+    )
 
     try:
         response.raise_for_status()

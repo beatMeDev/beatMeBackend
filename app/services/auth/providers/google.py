@@ -4,6 +4,7 @@ Google OAuth integration
 from datetime import datetime
 from typing import Dict
 from typing import Tuple
+from urllib.parse import urlencode
 
 from httpx import HTTPError
 from httpx import Response
@@ -13,15 +14,18 @@ from app.models.db.user import AuthProvider
 from app.services.auth.base import OAuthRoute
 from app.settings import GOOGLE_ID
 from app.settings import GOOGLE_REDIRECT_URI
+from app.settings import GOOGLE_SCOPE
 from app.settings import GOOGLE_SECRET
 from app.utils.exceptions import UnauthorizedError
 
 
 class GoogleAuth(OAuthRoute):
     """Google auth integration"""
+
     provider = AuthProvider.GOOGLE
     auth_endpoint = "https://oauth2.googleapis.com/token"
     account_endpoint = "https://www.googleapis.com/oauth2/v3/userinfo"
+    sign_in_endpoint = "https://accounts.google.com/o/oauth2/v2/auth"
 
     async def code_auth(self, code: str) -> Tuple[str, str, int]:
         data: Dict[str, str] = {
@@ -62,10 +66,24 @@ class GoogleAuth(OAuthRoute):
         profile_info = response.json()
 
         formatted_data = {
-            "id": str(profile_info.get("sub")),
+            "_id": str(profile_info.get("sub")),
             "name": profile_info.get("name"),
             "image": profile_info.get("picture"),
             "url": profile_info.get("link"),
         }
 
         return formatted_data
+
+    async def create_auth_link(self) -> str:
+        params: Dict[str, str] = {
+            "response_type": "code",
+            "client_id": GOOGLE_ID,
+            "scope": GOOGLE_SCOPE,
+            "redirect_uri": GOOGLE_REDIRECT_URI,
+            "state": "{secure=off}",
+            "access_type": "offline",
+        }
+        query: str = urlencode(params)
+        url: str = f"{self.sign_in_endpoint}?{query}"
+
+        return url

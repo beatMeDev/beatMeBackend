@@ -13,9 +13,14 @@ from app.models.api.challenge import ChallengeIn
 from app.models.api.challenge import ChallengeList
 from app.models.api.challenge import ChallengeListOut
 from app.models.api.challenge import ChallengeOut
+from app.models.api.submission import SubmissionIn
+from app.models.api.submission import SubmissionList
+from app.models.api.submission import SubmissionListOut
+from app.models.api.submission import SubmissionOut
 from app.models.api.user import UserList
 from app.models.api.user import UserListOut
 from app.models.db import Challenge
+from app.models.db import Submission
 from app.models.db import User
 from app.services.auth.base import bearer_auth
 from app.utils.db import Paginate
@@ -27,8 +32,7 @@ challenges_router = APIRouter()  # pylint: disable-msg=C0103
 
 @challenges_router.post("/", response_model=ChallengeOut)
 async def create_challenge_route(
-        challenge_data: ChallengeIn,
-        user_id: str = Depends(bearer_auth)
+        challenge_data: ChallengeIn, user_id: str = Depends(bearer_auth)
 ) -> PydanticModel:
     """
     Create challenge.
@@ -49,7 +53,9 @@ async def create_challenge_route(
     return response
 
 
-@challenges_router.get("/", response_model=ChallengeListOut, summary="Return public challenges")
+@challenges_router.get(
+    "/", response_model=ChallengeListOut, summary="Return public challenges"
+)
 async def get_public_challenges_route(
         pagination: Paginate = Depends(Paginate),
 ) -> ChallengeListOut:
@@ -61,18 +67,18 @@ async def get_public_challenges_route(
     """
     queryset = Challenge.filter(is_public=True)
     count, items = await pagination.paginate(
-        queryset=queryset,
-        serializer=ChallengeList,
+        queryset=queryset, serializer=ChallengeList,
     )
     response = ChallengeListOut(count=count, items=items)
 
     return response
 
 
-@challenges_router.get("/my/", response_model=ChallengeListOut, summary="Return own challenges")
+@challenges_router.get(
+    "/my/", response_model=ChallengeListOut, summary="Return own challenges"
+)
 async def get_my_challenges_route(
-        pagination: Paginate = Depends(Paginate),
-        user_id: str = Depends(bearer_auth),
+        pagination: Paginate = Depends(Paginate), user_id: str = Depends(bearer_auth),
 ) -> ChallengeListOut:
     """
     Return user own challenges
@@ -82,8 +88,7 @@ async def get_my_challenges_route(
     """
     queryset = Challenge.filter(owner_id=user_id)
     count, items = await pagination.paginate(
-        queryset=queryset,
-        serializer=ChallengeList,
+        queryset=queryset, serializer=ChallengeList,
     )
     response = ChallengeListOut(count=count, items=items)
 
@@ -96,8 +101,7 @@ async def get_my_challenges_route(
     summary="Return participants challenges",
 )
 async def get_participant_challenges_route(
-        pagination: Paginate = Depends(Paginate),
-        user_id: str = Depends(bearer_auth),
+        pagination: Paginate = Depends(Paginate), user_id: str = Depends(bearer_auth),
 ) -> ChallengeListOut:
     """
     Return challenges where user is participant
@@ -107,19 +111,20 @@ async def get_participant_challenges_route(
     """
     queryset = Challenge.filter(participants__id=user_id)
     count, items = await pagination.paginate(
-        queryset=queryset,
-        serializer=ChallengeList,
+        queryset=queryset, serializer=ChallengeList,
     )
     response = ChallengeListOut(count=count, items=items)
 
     return response
 
 
-@challenges_router.post("/{challenge_id}/accept/", response_model=ChallengeOut, summary="Accept")
+@challenges_router.post(
+    "/{challenge_id}/accept/", response_model=ChallengeOut, summary="Accept"
+)
 async def accept_challenge_route(
         challenge_id: UUID,
         secret: Optional[str] = None,
-        user_id: str = Depends(bearer_auth)
+        user_id: str = Depends(bearer_auth),
 ) -> PydanticModel:
     """
     Accept challenge.
@@ -146,8 +151,7 @@ async def accept_challenge_route(
 
 @challenges_router.get("/{challenge_id}/participants/", response_model=UserListOut)
 async def get_challenge_participants_route(
-        challenge_id: UUID,
-        pagination: Paginate = Depends(Paginate),
+        challenge_id: UUID, pagination: Paginate = Depends(Paginate),
 ) -> UserListOut:
     """
     Get challenge participants.
@@ -157,18 +161,68 @@ async def get_challenge_participants_route(
     """
     challenge: Challenge = await Challenge.get(id=challenge_id)
     count, items = await pagination.paginate(
-        queryset=challenge.participants.all(),
-        serializer=UserList,
+        queryset=challenge.participants.all(), serializer=UserList,
     )
     response = UserListOut(count=count, items=items)
 
     return response
 
 
-@challenges_router.get("/{challenge_id}/", response_model=ChallengeOut, summary="Return challenge")
-async def get_challenge_route(
+@challenges_router.post(
+    "/{challenge_id}/submit/", response_model=SubmissionOut, summary="Submit track",
+)
+async def add_submission_route(
         challenge_id: UUID,
-        secret: Optional[str] = None,
+        submission_data: SubmissionIn,
+        user_id: str = Depends(bearer_auth),
+) -> PydanticModel:
+    """
+    Submit track for a challenge.
+
+    If submission exists for a current challenge, url will be updated.
+    :param challenge_id: challenge id
+    :param submission_data: submission data(url)
+    :param user_id: user's id
+    :return: submission
+    """
+    challenge: Challenge = await Challenge.get(id=challenge_id)
+    submission: Optional[Submission] = await Submission.filter(
+        challenge=challenge, user_id=user_id
+    ).first()
+
+    if not submission:
+        submission = await Submission.create(
+            url=submission_data.url, challenge=challenge, user_id=user_id,
+        )
+    else:
+        submission.url = submission_data.url  # type: ignore
+        await submission.save()
+
+    response = await SubmissionOut.from_tortoise_orm(submission)
+
+    return response
+
+
+@challenges_router.get("/{challenge_id}/submissions/", response_model=SubmissionListOut)
+async def get_challenge_submission_route(
+        challenge_id: UUID, pagination: Paginate = Depends(Paginate),
+) -> SubmissionListOut:
+    """Get challenge submissions."""
+    queryset = Submission.filter(challenge_id=challenge_id)
+    count, items = await pagination.paginate(
+        queryset=queryset, serializer=SubmissionList,
+    )
+
+    response = SubmissionListOut(count=count, items=items)
+
+    return response
+
+
+@challenges_router.get(
+    "/{challenge_id}/", response_model=ChallengeOut, summary="Return challenge"
+)
+async def get_challenge_route(
+        challenge_id: UUID, secret: Optional[str] = None,
 ) -> PydanticModel:
     """
     Return challenge details

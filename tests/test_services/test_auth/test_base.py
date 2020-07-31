@@ -1,10 +1,11 @@
-"""Base test_auth test_services test."""
+"""Base auth test_services test."""
 
 import asyncio
 
-from typing import Any, Tuple
+from typing import Any
 from typing import Dict
 from typing import Optional
+from typing import Tuple
 from typing import Union
 from unittest import mock
 from unittest.mock import MagicMock
@@ -32,6 +33,7 @@ from app.settings import JWT_SECRET
 
 USER_UUID = UUID("ef4b35cb-1c32-43b7-a986-14ba5d05064f")
 AUTH_ACCOUNT_ID = "1"
+REDIRECT_LINK = "link"
 
 
 async def endpoint_logic() -> None:
@@ -40,21 +42,25 @@ async def endpoint_logic() -> None:
 
 
 class TestOAuthRoute(OAuthRoute):
-    """Test test_auth class with mocked methods."""
+    """Test auth class with mocked methods."""
 
     __test__ = False
 
     async def code_auth(self, code: str) -> Tuple[str, str, int]:
         """
-        Code test_auth mock.
-        :param code: test_auth code
+        Code auth mock.
+        :param code: auth code
         :return: mock value
         """
         return "access_token", "refresh_token", 1000000
 
     async def get_account_info(self, access_token: str) -> Dict[str, str]:
         """Get account info mock."""
-        return {"id": AUTH_ACCOUNT_ID, "name": "Test", "image": "link", "url": "link"}
+        return {"_id": AUTH_ACCOUNT_ID, "name": "Test", "image": "link", "url": "link"}
+
+    async def create_auth_link(self) -> str:
+        """Create link for sign in on external provider."""
+        return REDIRECT_LINK
 
 
 def get_patched_route() -> TestOAuthRoute:
@@ -64,10 +70,11 @@ def get_patched_route() -> TestOAuthRoute:
     return route
 
 
-async def get_auth_request(user_id: Optional[str] = None) -> Request:
+async def get_auth_request(method: str, user_id: Optional[str] = None) -> Request:
     """Create test request."""
     request_scope = {
         "type": "http",
+        "method": method,
         "query_params": QueryParams(code="test"),
         "query_string": b"code=test",
         "headers": {},
@@ -119,9 +126,9 @@ async def test_create_tokens_check_tokens(set_mock: MagicMock) -> None:
 
 @pytest.mark.asyncio
 @mock.patch("app.extensions.redis_client.set")
-async def test_base_auth_route(set_mock: MagicMock) -> None:
+async def test_base_auth_route_on_post(set_mock: MagicMock) -> None:
     """
-    Check test_auth handler when AuthAccount and User are not exist,
+    Check auth handler when AuthAccount and User are not exist,
     AuthAccount, User and relation between them should be created,
     tokens should be returned.
     """
@@ -129,11 +136,11 @@ async def test_base_auth_route(set_mock: MagicMock) -> None:
     set_mock.return_value.set_result(True)
     route = get_patched_route()
     route_handler = route.get_route_handler()
-    request: Request = await get_auth_request()
+    request: Request = await get_auth_request(method="POST")
 
     response: ORJSONResponse = await route_handler(request)
     response_body = loads(response.body)
-    auth_account: AuthAccount = await AuthAccount.get(id=AUTH_ACCOUNT_ID)
+    auth_account: AuthAccount = await AuthAccount.get(_id=AUTH_ACCOUNT_ID)
     user: User = await User.get(auth_accounts__in=[auth_account])
 
     assert AuthOut(**response_body).validate(response_body)
@@ -142,10 +149,27 @@ async def test_base_auth_route(set_mock: MagicMock) -> None:
 
 
 @pytest.mark.asyncio
+async def test_base_auth_route_on_get() -> None:
+    """
+    Check auth handler on GET will return sign in link for external provider.
+    """
+    route = get_patched_route()
+    route_handler = route.get_route_handler()
+    request: Request = await get_auth_request(method="GET")
+
+    response: ORJSONResponse = await route_handler(request)
+
+    assert response.status_code == 307
+    assert response.headers["location"] == REDIRECT_LINK
+
+
+@pytest.mark.asyncio
 @mock.patch("app.extensions.redis_client.set")
 @mock.patch("app.extensions.redis_client.get")
 @mock.patch("app.extensions.redis_client.delete")
-async def test_logout(delete_mock: MagicMock, get_mock: MagicMock, set_mock: MagicMock) -> None:
+async def test_logout(
+        delete_mock: MagicMock, get_mock: MagicMock, set_mock: MagicMock
+) -> None:
     """
     Check that access token and refresh token will be deleted from redis.
     """

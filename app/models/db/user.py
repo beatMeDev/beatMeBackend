@@ -4,11 +4,13 @@ from typing import Iterator
 from typing import List
 
 from tortoise import fields
-from tortoise import models
+
+from app.models.db.base import BaseModel
 
 
 class AuthProvider(str, Enum):
     """Auth providers enum."""
+
     DEFAULT = "DEFAULT"
     SPOTIFY = "SPOTIFY"
     GOOGLE = "GOOGLE"
@@ -19,39 +21,62 @@ class AuthProvider(str, Enum):
         return iter([self.SPOTIFY, self.GOOGLE, self.VK, self.FACEBOOK])
 
 
-class User(models.Model):
+class User(BaseModel):
     """User model."""
-    id = fields.UUIDField(pk=True)
+
     auth_accounts = fields.ManyToManyField(
         "models.AuthAccount", related_name="users", through="users_auth_accounts",
     )
 
     def name(self) -> str:
         """Last auth account name."""
-        return getattr(self.auth_accounts[-1], "name")  # pylint: disable=unsubscriptable-object
+        return getattr(
+            self.auth_accounts[-1], "name"  # pylint: disable=unsubscriptable-object
+        )
 
     def image(self) -> str:
         """Last auth account image."""
-        return getattr(self.auth_accounts[-1], "image")  # pylint: disable=unsubscriptable-object
+        return getattr(
+            self.auth_accounts[-1], "image"  # pylint: disable=unsubscriptable-object
+        )
 
     def url(self) -> str:
         """Last auth account image."""
-        return getattr(self.auth_accounts[-1], "url")  # pylint: disable=unsubscriptable-object
+        return getattr(
+            self.auth_accounts[-1], "url"  # pylint: disable=unsubscriptable-object
+        )
 
     def providers(self) -> List[str]:
         """User's auth accounts provides."""
-        return [getattr(auth_account, "provider") for auth_account in self.auth_accounts]  # pylint: disable=not-an-iterable
+        return [
+            getattr(auth_account, "provider")
+            for auth_account in self.auth_accounts  # pylint: disable=not-an-iterable
+        ]
+
+    def __str__(self) -> str:
+        return self.name()
 
     class PydanticMeta:  # pylint: disable=too-few-public-methods
         """Serializations options."""
-        exclude = ("own_challenges", "challenges", )
-        computed = ("name", "image", "url", "providers", )
+
+        exclude = (
+            "own_challenges",
+            "challenges",
+            "submissions",
+            "votes",
+        )
+        computed = (
+            "name",
+            "image",
+            "url",
+            "providers",
+        )
 
 
-class AuthAccount(models.Model):
+class AuthAccount(BaseModel):
     """Auth account model."""
-    _id = fields.UUIDField(pk=True)
-    id = fields.CharField(max_length=255, null=False)
+
+    _id = fields.CharField(max_length=255, null=False)
     name = fields.CharField(max_length=255, null=True)
     image = fields.CharField(max_length=2048, null=True)
     url = fields.CharField(max_length=2048, null=True)
@@ -63,4 +88,9 @@ class AuthAccount(models.Model):
 
     class PydanticMeta:  # pylint: disable=too-few-public-methods
         """Serializations options."""
-        exclude = ("access_token", "refresh_token", "expires",)
+
+        exclude = (
+            "access_token",
+            "refresh_token",
+            "expires",
+        )

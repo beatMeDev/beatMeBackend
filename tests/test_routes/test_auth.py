@@ -1,24 +1,34 @@
 """Test auth endpoints"""
-from typing import List, Tuple, Dict
+from typing import Dict
+from typing import List
+from typing import Tuple
 
 import pytest
+
 from starlette.testclient import TestClient
 
 from app import application
 
+
 client: TestClient = TestClient(application)
 
 requests: List[Tuple[str, str, Dict[str, str], int]] = [
-    ("POST", "/api/auth/facebook/", {}, 422),
-    ("POST", "/api/auth/google/", {}, 422),
-    ("POST", "/api/auth/spotify/", {}, 422),
-    ("POST", "/api/auth/vk/", {}, 422),
+    ("POST", "/api/auth/facebook/", {}, 400),
+    ("GET", "/api/auth/facebook/", {}, 307),
+    ("POST", "/api/auth/google/", {}, 400),
+    ("GET", "/api/auth/google/", {}, 307),
+    ("POST", "/api/auth/spotify/", {}, 400),
+    ("GET", "/api/auth/spotify/", {}, 307),
+    ("POST", "/api/auth/vk/", {}, 400),
+    ("GET", "/api/auth/vk/", {}, 307),
     ("POST", "/api/auth/logout/", {}, 403),
     ("POST", "/api/auth/refresh/", {}, 403),
 ]
 
 
-@pytest.mark.parametrize("method,endpoint,data,expected_status", requests)  # pylint: disable=not-callable
+@pytest.mark.parametrize(  # pylint: disable=not-callable
+    "method,endpoint,data,expected_status", requests
+)
 def test_endpoint_exists(
         method: str, endpoint: str, data: Dict[str, str], expected_status: int
 ) -> None:

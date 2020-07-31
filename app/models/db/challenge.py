@@ -8,8 +8,8 @@ import jwt
 
 from tortoise import Tortoise
 from tortoise import fields
-from tortoise import models
 
+from app.models.db.base import BaseModel
 from app.settings import ITEM_SECRET
 from app.settings import JWT_ALGORITHM
 from app.utils.exceptions import PermissionsDeniedError
@@ -39,18 +39,16 @@ def vote_end_date(days: int = 2) -> datetime:
     return end_date
 
 
-class Challenge(models.Model):
+class Challenge(BaseModel):
     """Challenge model."""
-    id = fields.UUIDField(pk=True)
+
     name = fields.CharField(max_length=255, null=True)
     challenge_end = fields.DatetimeField(null=True, default=challenge_end_date)
     vote_end = fields.DatetimeField(null=True, default=vote_end_date)
     is_public = fields.BooleanField(null=True, default=True)
     is_open = fields.BooleanField(null=True, default=True)
-    owner = fields.ForeignKeyField('models.User', related_name='own_challenges')
-    track = fields.ForeignKeyField('models.Track', related_name='challenges')
-
-    created_at = fields.DatetimeField(null=True, auto_now=True)
+    owner = fields.ForeignKeyField("models.User", related_name="own_challenges")
+    track = fields.ForeignKeyField("models.Track", related_name="challenges")
 
     participants = fields.ManyToManyField(
         "models.User", related_name="challenges", through="challenges_participants"
@@ -66,9 +64,7 @@ class Challenge(models.Model):
 
         payload: Dict[str, str] = {"id": str(self.id)}
         secret: str = jwt.encode(
-            payload=payload,
-            key=ITEM_SECRET,
-            algorithm=JWT_ALGORITHM,
+            payload=payload, key=ITEM_SECRET, algorithm=JWT_ALGORITHM,
         ).decode("utf-8")
 
         return secret
@@ -86,13 +82,12 @@ class Challenge(models.Model):
 
     class PydanticMeta:  # pylint: disable=too-few-public-methods
         """Serializations options."""
-        exclude = ("participants", )
+
+        exclude = ("participants", "submissions", "votes", )
         computed = ("secret_key", )
         exclude_raw_fields = True
 
 
-Tortoise.init_models([
-    "app.models.db.user",
-    "app.models.db.track",
-    "app.models.db.challenge",
-], "models")  # pydantic schema hack
+Tortoise.init_models(
+    ["app.models.db.challenge", "app.models.db.user", "app.models.db.track", ], "models"
+)  # pydantic schema hack

@@ -1,6 +1,9 @@
 """Auth routes"""
+from typing import Any
 from typing import Dict
+from typing import List
 from typing import Optional
+from typing import Tuple
 from typing import Union
 
 from fastapi import APIRouter
@@ -18,38 +21,32 @@ from app.services.auth.base import logout
 from app.services.auth.base import refresh_tokens
 
 
-async def process_auth_route(code: str) -> None:  # pylint: disable=unused-argument
+async def process_auth_route(code: Optional[str] = None) -> None:  # pylint: disable=unused-argument
     """Process auth routes"""
     ...
 
 
 auth_router = APIRouter()  # pylint: disable-msg=C0103
 
-fb_router = APIRouter(route_class=FacebookAuth)  # pylint: disable-msg=C0103
-google_router = APIRouter(route_class=GoogleAuth)  # pylint: disable-msg=C0103
-spotify_router = APIRouter(route_class=SpotifyAuth)  # pylint: disable-msg=C0103
-vk_router = APIRouter(route_class=VKAuth)  # pylint: disable-msg=C0103
+providers: List[Tuple[Any, str]] = [
+    (FacebookAuth, "/facebook/", ),
+    (GoogleAuth, "/google/", ),
+    (SpotifyAuth, "/spotify/", ),
+    (VKAuth, "/vk/", ),
+]
 
-fb_router.add_api_route(
-    path="/facebook/", methods=["POST"], endpoint=process_auth_route
-)
-google_router.add_api_route(
-    path="/google/", methods=["POST"], endpoint=process_auth_route
-)
-spotify_router.add_api_route(
-    path="/spotify/", methods=["POST"], endpoint=process_auth_route
-)
-vk_router.add_api_route(path="/vk/", methods=["POST"], endpoint=process_auth_route)
-
-auth_router.include_router(fb_router)
-auth_router.include_router(google_router)
-auth_router.include_router(spotify_router)
-auth_router.include_router(vk_router)
+for provider, endpoint in providers:
+    router = APIRouter(route_class=provider)
+    router.add_api_route(
+        path=endpoint, methods=["GET", "POST"], endpoint=process_auth_route
+    )
+    auth_router.include_router(router)
 
 
 @auth_router.post("/logout/", response_model=LogoutOut, summary="Destroy auth session")
 async def logout_route(
-        request: Request, user_id: str = Depends(bearer_auth)  # pylint: disable=unused-argument
+        request: Request,
+        user_id: str = Depends(bearer_auth),  # pylint: disable=unused-argument
 ) -> LogoutOut:
     """Logout user endpoint."""
     access_token: Optional[str] = request.scope.get("token")
@@ -62,7 +59,7 @@ async def logout_route(
 @auth_router.post("/refresh/", response_model=AuthOut, summary="Refresh tokens")
 async def refresh_route(
         request: Request,
-        user_id: str = Depends(bearer_auth)  # pylint: disable=unused-argument
+        user_id: str = Depends(bearer_auth),  # pylint: disable=unused-argument
 ) -> AuthOut:
     """Refresh user tokens endpoint."""
     refresh_token: str = request.scope["token"]

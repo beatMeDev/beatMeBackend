@@ -16,11 +16,12 @@
 - [x] Import playlists from *spotify*
 - [x] Tracks
 - [x] Participants
-- [ ] Submissions
-- [ ] Voting
+- [x] Submissions
+- [x] Voting
+- [x] Populate recommended playlists
 - [ ] Challenge statistics/scoreboard
 - [ ] Search track on youtube
-- [ ] Populate recommended playlists
+- [ ] 100% coverage
 
 ## Installation
 
@@ -54,20 +55,30 @@ Tests are work by `pytest` and use `sqlite`(`TORTOISE_TEST_DB` in settings/base.
 - `/swagger/` - automatic interactive API documentation.
 - `/redoc/` - alternative automatic documentation.
 
+## Manage commands
+To run manage command: `python manage/main.py {command}`
+
+- `populate_texts` - populate texts for frontend loader from `texts.json`
+- `populate_playlists` - populate *spotify* playlists from `playlists.json`
+
+> Don't forget to set PYTHONPATH to the project
+
 ## Project structure
 
 ```
-app                     - app root directory
-├── __init__.py         - contains application initialization
-├── models              - application models
-│   ├── __init__.py     - contains __models__ for tortoise orm models exploring
-│   ├── api             - pydantic models
-│   └── db              - tortoise orm models
-├── routes              - api endpoints
-├── services            - services with application logic
-│   └── auth            - authentication services
-│       └── providers   - external OAuth providers
-├── settings            - applicaitons settings
-└── utils               - other stuff
-tests                   - tests root directory
+app                         - app root directory
+├── main.py                 - contains application factory
+├── models                  - application models
+│         ├── api                 - pydantic models
+│         └── db                  - tortoise orm models
+│         └── __init__.py   - contains __models__ for tortoise orm models exploring
+├── routes                  - api endpoints
+├── services                - services with application logic
+│         └── auth                - authentication services
+│             └── providers       - external OAuth providers
+├── settings                - applicaitons settings
+└── utils                   - other stuff
+tests                       - tests root directory
+manage                      - application management
+└── fixtures                - json fixtures storage
 ```
