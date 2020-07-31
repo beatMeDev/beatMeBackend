@@ -130,10 +130,10 @@ class OAuthRoute(APIRoute):
         async def custom_route_handler(request: Request) -> Response:
             await original_route_handler(request)
 
-            if request.method == "GET":
+            if request.method.upper() == "GET":
                 return await self.handle_get()
 
-            if request.method == "POST":
+            if request.method.upper() == "POST":
                 return await self.handle_post(request=request)
 
             raise BadRequestError

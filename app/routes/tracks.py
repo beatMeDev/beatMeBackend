@@ -19,11 +19,12 @@ async def get_random_track_route() -> PydanticModel:
     Get random recommended track.
     :return: track
     """
-    count: int = await Track.filter(recommended=True).count()
+    count: int = await Track.filter(recommended=True, preview_url__isnull=False).count()
     offset: int = randint(0, count - 1)
-    track: Optional[Track] = await Track.filter(recommended=True).limit(1).offset(
-        offset
-    ).first()
+    track: Optional[Track] = await Track.filter(
+        recommended=True,
+        preview_url__isnull=False,
+    ).limit(1).offset(offset).first()
     response: PydanticModel = await TrackOut.from_tortoise_orm(track)
 
     return response

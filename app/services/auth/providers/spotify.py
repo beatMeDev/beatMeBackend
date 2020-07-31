@@ -11,7 +11,6 @@ from urllib.parse import urlencode
 from fastapi import Depends
 from httpx import HTTPError
 from httpx import Response
-from starlette.requests import Request
 
 from app.extensions import http_client
 from app.models.db.user import AuthAccount
@@ -98,7 +97,6 @@ class SpotifyAuth(OAuthRoute):
 
 
 async def spotify_auth(
-        request: Request,  # pylint: disable=unused-argument
         user_id: Optional[str] = Depends(bearer_auth),
 ) -> str:
     """Spotify auth dependence"""
