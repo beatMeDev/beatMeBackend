@@ -1,4 +1,6 @@
 """Test pre running stuff"""
+import warnings
+
 from typing import AsyncGenerator
 
 import pytest
@@ -9,6 +11,11 @@ from tortoise.exceptions import DBConnectionError
 
 from app.settings import APP_MODELS
 from app.settings import TORTOISE_TEST_DB
+
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    import imp  # pylint: disable=unused-import
 
 
 @pytest.fixture(scope="function", autouse=True)
