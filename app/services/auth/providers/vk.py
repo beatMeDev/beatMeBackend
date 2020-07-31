@@ -20,6 +20,7 @@ from app.utils.exceptions import UnauthorizedError
 
 class VKAuth(OAuthRoute):
     """VK auth integration"""
+
     provider = AuthProvider.VK
     auth_endpoint = "https://oauth.vk.com/access_token"
     account_endpoint = "https://api.vk.com/method/users.get"
@@ -73,7 +74,7 @@ class VKAuth(OAuthRoute):
         last_name = profile_info.get("last_name")
 
         formatted_data = {
-            "id": str(user_id),
+            "_id": str(user_id),
             "name": f"{first_name} {last_name}",
             "image": profile_info.get("photo_400_orig"),
             "url": f"https://vk.com/id{user_id}",

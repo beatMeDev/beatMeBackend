@@ -1,11 +1,12 @@
 """Playlist models"""
 from tortoise import fields
-from tortoise import models
+
+from app.models.db.base import BaseModel
 
 
-class Playlist(models.Model):
+class Playlist(BaseModel):
     """Playlist model."""
-    id = fields.UUIDField(pk=True)
+
     name = fields.CharField(max_length=255, null=True)
     url = fields.CharField(max_length=255, null=True)
     spotify_id = fields.CharField(max_length=255, null=True)
@@ -17,4 +18,5 @@ class Playlist(models.Model):
 
     class PydanticMeta:  # pylint: disable=too-few-public-methods
         """Serializations options."""
+
         exclude = ("tracks",)

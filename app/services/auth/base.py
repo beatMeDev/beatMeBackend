@@ -82,7 +82,7 @@ class OAuthRoute(APIRoute):
             user_created: bool = False
 
             auth_account: Optional[AuthAccount] = await AuthAccount.filter(
-                id=account_info["id"]
+                _id=account_info["_id"]
             ).first()
 
             if auth_account:
@@ -171,7 +171,9 @@ async def create_tokens(user_id: str) -> Dict[str, Union[str, int]]:
 
 async def bearer_auth(
         request: Request,
-        http_credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer()),  # pylint: disable=unused-argument
+        http_credentials: HTTPAuthorizationCredentials = Depends(
+            HTTPBearer()
+        ),  # pylint: disable=unused-argument
 ) -> Optional[str]:
     """Auth dependence."""
     token_data: Dict[str, str] = request.scope.get("token_data", {})

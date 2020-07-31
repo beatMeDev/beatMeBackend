@@ -21,6 +21,7 @@ from app.utils.exceptions import UnauthorizedError
 
 class TokenAuthMiddleware(BaseHTTPMiddleware):
     """Check user credentials."""
+
     async def dispatch(
             self, request: Request, call_next: RequestResponseEndpoint
     ) -> Response:
@@ -29,7 +30,7 @@ class TokenAuthMiddleware(BaseHTTPMiddleware):
         if not authorization:
             return await call_next(request)
 
-        scheme, token = get_authorization_scheme_param(authorization)  # pylint: disable=unused-variable
+        _, token = get_authorization_scheme_param(authorization)
 
         if not token:
             return await call_next(request)

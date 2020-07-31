@@ -1,10 +1,11 @@
 """Track models"""
 from tortoise import Tortoise
 from tortoise import fields
-from tortoise import models
+
+from app.models.db.base import BaseModel
 
 
-class Track(models.Model):
+class Track(BaseModel):
     """
     meta example:
         {
@@ -15,7 +16,7 @@ class Track(models.Model):
             "duration": 205
         }
     """
-    id = fields.UUIDField(pk=True)
+
     name = fields.CharField(max_length=255, null=True)
     author_name = fields.CharField(max_length=255, null=True)
     cover_url = fields.CharField(max_length=255, null=True)
@@ -28,7 +29,8 @@ class Track(models.Model):
 
     class PydanticMeta:  # pylint: disable=too-few-public-methods
         """Serializations options."""
-        exclude = ("challenges", )
+
+        exclude = ("challenges",)
 
 
 Tortoise.init_models(["app.models.db.track"], "models")  # pydantic schema hack

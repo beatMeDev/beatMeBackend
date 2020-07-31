@@ -2,9 +2,10 @@
 
 import asyncio
 
-from typing import Any, Tuple
+from typing import Any
 from typing import Dict
 from typing import Optional
+from typing import Tuple
 from typing import Union
 from unittest import mock
 from unittest.mock import MagicMock
@@ -54,7 +55,7 @@ class TestOAuthRoute(OAuthRoute):
 
     async def get_account_info(self, access_token: str) -> Dict[str, str]:
         """Get account info mock."""
-        return {"id": AUTH_ACCOUNT_ID, "name": "Test", "image": "link", "url": "link"}
+        return {"_id": AUTH_ACCOUNT_ID, "name": "Test", "image": "link", "url": "link"}
 
 
 def get_patched_route() -> TestOAuthRoute:
@@ -133,7 +134,7 @@ async def test_base_auth_route(set_mock: MagicMock) -> None:
 
     response: ORJSONResponse = await route_handler(request)
     response_body = loads(response.body)
-    auth_account: AuthAccount = await AuthAccount.get(id=AUTH_ACCOUNT_ID)
+    auth_account: AuthAccount = await AuthAccount.get(_id=AUTH_ACCOUNT_ID)
     user: User = await User.get(auth_accounts__in=[auth_account])
 
     assert AuthOut(**response_body).validate(response_body)
@@ -145,7 +146,9 @@ async def test_base_auth_route(set_mock: MagicMock) -> None:
 @mock.patch("app.extensions.redis_client.set")
 @mock.patch("app.extensions.redis_client.get")
 @mock.patch("app.extensions.redis_client.delete")
-async def test_logout(delete_mock: MagicMock, get_mock: MagicMock, set_mock: MagicMock) -> None:
+async def test_logout(
+        delete_mock: MagicMock, get_mock: MagicMock, set_mock: MagicMock
+) -> None:
     """
     Check that access token and refresh token will be deleted from redis.
     """

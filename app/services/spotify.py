@@ -47,9 +47,7 @@ async def get_playlist_info(
     """
     resource = "playlists"
     url = f"{SPOTIFY_API}{resource}/{playlist_id}"
-    headers: Dict[str, str] = {
-        "Authorization": f"Bearer {access_token}"
-    }
+    headers: Dict[str, str] = {"Authorization": f"Bearer {access_token}"}
     response: Response = await http_client.get(url=url, headers=headers)
 
     try:

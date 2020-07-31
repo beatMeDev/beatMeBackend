@@ -15,7 +15,9 @@ POSTGRES_HOST: str = config("DATABASE_HOST", cast=str, default="127.0.0.1")
 POSTGRES_PORT: str = config("DATABASE_PORT", cast=str, default="5432")
 POSTGRES_NAME: str = config("DATABASE_NAME", cast=str, default="postgres")
 
-APP_MODELS = ["app.models.db", ]
+APP_MODELS = [
+    "app.models.db",
+]
 TORTOISE_CONFIG = {
     "connections": {
         "default": {

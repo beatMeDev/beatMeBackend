@@ -16,18 +16,17 @@ from app.settings import PAGE_MAX_LIMIT
 
 class Paginate:  # pylint: disable=too-few-public-methods
     """Pagination dependency."""
+
     def __init__(
             self,
             limit: int = Query(default=PAGE_LIMIT, le=PAGE_MAX_LIMIT),
-            offset: int = Query(default=0, ge=0)
+            offset: int = Query(default=0, ge=0),
     ):
         self.limit: int = limit
         self.offset: int = offset
 
     async def paginate(
-            self,
-            queryset: QuerySet[MODEL],
-            serializer: Type[PydanticListModel],
+            self, queryset: QuerySet[MODEL], serializer: Type[PydanticListModel],
     ) -> Tuple[int, List[PydanticModel]]:
         """
         Paginate query
@@ -39,7 +38,7 @@ class Paginate:  # pylint: disable=too-few-public-methods
         """
         count, items = await gather(
             queryset.count(),
-            serializer.from_queryset(queryset.limit(self.limit).offset(self.offset))
+            serializer.from_queryset(queryset.limit(self.limit).offset(self.offset)),
         )
 
         return count, items.__root__

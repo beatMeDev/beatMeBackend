@@ -20,6 +20,7 @@ from app.utils.exceptions import UnauthorizedError
 
 class FacebookAuth(OAuthRoute):
     """Facebook auth integration"""
+
     provider = AuthProvider.FACEBOOK
     auth_endpoint = (
         f"https://graph.facebook.com/{FACEBOOK_API_VERSION}/oauth/access_token"
@@ -33,7 +34,9 @@ class FacebookAuth(OAuthRoute):
             "client_secret": FACEBOOK_SECRET,
             "client_id": FACEBOOK_ID,
         }
-        response: Response = await http_client.get(url=self.auth_endpoint, params=params)
+        response: Response = await http_client.get(
+            url=self.auth_endpoint, params=params
+        )
 
         try:
             response.raise_for_status()
@@ -65,7 +68,7 @@ class FacebookAuth(OAuthRoute):
         last_name = profile_info.get("last_name")
 
         formatted_data = {
-            "id": str(profile_info.get("id")),
+            "_id": str(profile_info.get("id")),
             "name": f"{first_name} {last_name}",
             "image": profile_info.get("picture", {}).get("data", {}).get("url"),
             "url": profile_info.get("link"),

@@ -33,7 +33,9 @@ class ChallengeIn(BaseModel):
     track_id: UUID
 
     @validator("vote_end")
-    def vote_end_greater_end_data(cls, value: datetime, values: Dict[str, Any]) -> datetime:
+    def vote_end_greater_end_data(
+        cls, value: datetime, values: Dict[str, Any]
+    ) -> datetime:
         """Validate vote end date."""
         challenge_end: Optional[datetime] = values.get("challenge_end")
 

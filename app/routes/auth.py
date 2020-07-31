@@ -49,7 +49,8 @@ auth_router.include_router(vk_router)
 
 @auth_router.post("/logout/", response_model=LogoutOut, summary="Destroy auth session")
 async def logout_route(
-        request: Request, user_id: str = Depends(bearer_auth)  # pylint: disable=unused-argument
+        request: Request,
+        user_id: str = Depends(bearer_auth),  # pylint: disable=unused-argument
 ) -> LogoutOut:
     """Logout user endpoint."""
     access_token: Optional[str] = request.scope.get("token")
@@ -62,7 +63,7 @@ async def logout_route(
 @auth_router.post("/refresh/", response_model=AuthOut, summary="Refresh tokens")
 async def refresh_route(
         request: Request,
-        user_id: str = Depends(bearer_auth)  # pylint: disable=unused-argument
+        user_id: str = Depends(bearer_auth),  # pylint: disable=unused-argument
 ) -> AuthOut:
     """Refresh user tokens endpoint."""
     refresh_token: str = request.scope["token"]

@@ -19,6 +19,7 @@ from app.utils.exceptions import UnauthorizedError
 
 class GoogleAuth(OAuthRoute):
     """Google auth integration"""
+
     provider = AuthProvider.GOOGLE
     auth_endpoint = "https://oauth2.googleapis.com/token"
     account_endpoint = "https://www.googleapis.com/oauth2/v3/userinfo"
@@ -62,7 +63,7 @@ class GoogleAuth(OAuthRoute):
         profile_info = response.json()
 
         formatted_data = {
-            "id": str(profile_info.get("sub")),
+            "_id": str(profile_info.get("sub")),
             "name": profile_info.get("name"),
             "image": profile_info.get("picture"),
             "url": profile_info.get("link"),
