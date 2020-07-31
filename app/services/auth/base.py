@@ -20,7 +20,6 @@ from fastapi.security import HTTPBearer
 from orjson import dumps  # pylint: disable-msg=E0611
 from orjson import loads  # pylint: disable-msg=E0611
 from starlette.requests import Request
-from starlette.responses import RedirectResponse
 from starlette.responses import Response
 
 from app.extensions import redis_client
@@ -67,7 +66,7 @@ class OAuthRoute(APIRoute):
     async def create_auth_link(self) -> str:
         """
         Create link for user sign in on external provider.
-        :return: link
+        :return: {"link": link}
         """
         raise NotImplementedError
 
@@ -117,10 +116,10 @@ class OAuthRoute(APIRoute):
 
         return ORJSONResponse(tokens)
 
-    async def handle_get(self) -> RedirectResponse:
+    async def handle_get(self) -> ORJSONResponse:
         """On GET generating sign in link on external provider."""
         link: str = await self.create_auth_link()
-        response: RedirectResponse = RedirectResponse(link)
+        response: ORJSONResponse = ORJSONResponse({"link": link})
 
         return response
 

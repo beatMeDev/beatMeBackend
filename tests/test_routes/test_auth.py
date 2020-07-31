@@ -14,13 +14,13 @@ client: TestClient = TestClient(application)
 
 requests: List[Tuple[str, str, Dict[str, str], int]] = [
     ("POST", "/api/auth/facebook/", {}, 400),
-    ("GET", "/api/auth/facebook/", {}, 307),
+    ("GET", "/api/auth/facebook/", {}, 200),
     ("POST", "/api/auth/google/", {}, 400),
-    ("GET", "/api/auth/google/", {}, 307),
+    ("GET", "/api/auth/google/", {}, 200),
     ("POST", "/api/auth/spotify/", {}, 400),
-    ("GET", "/api/auth/spotify/", {}, 307),
+    ("GET", "/api/auth/spotify/", {}, 200),
     ("POST", "/api/auth/vk/", {}, 400),
-    ("GET", "/api/auth/vk/", {}, 307),
+    ("GET", "/api/auth/vk/", {}, 200),
     ("POST", "/api/auth/logout/", {}, 403),
     ("POST", "/api/auth/refresh/", {}, 403),
 ]

@@ -158,9 +158,10 @@ async def test_base_auth_route_on_get() -> None:
     request: Request = await get_auth_request(method="GET")
 
     response: ORJSONResponse = await route_handler(request)
+    response_body = loads(response.body)
 
-    assert response.status_code == 307
-    assert response.headers["location"] == REDIRECT_LINK
+    assert response.status_code == 200
+    assert response_body == {"link": REDIRECT_LINK}
 
 
 @pytest.mark.asyncio
