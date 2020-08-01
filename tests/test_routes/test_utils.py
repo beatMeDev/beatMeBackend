@@ -8,9 +8,10 @@ import pytest
 from starlette.testclient import TestClient
 from truth.truth import AssertThat  # type: ignore
 
-from app import application
+from app import get_application
 
 
+application = get_application()
 client: TestClient = TestClient(application)
 
 requests: List[Tuple[str, str, Dict[str, str], int]] = [

@@ -10,7 +10,7 @@ from freezegun import freeze_time  # type: ignore
 from starlette.testclient import TestClient
 from truth.truth import AssertThat  # type: ignore
 
-from app import application
+from app import get_application
 from app.services.auth.base import bearer_auth
 from tests.conftest import POPULATE_TRACK_ID
 from tests.test_services.test_auth.test_base import USER_UUID
@@ -21,6 +21,7 @@ async def bearer_auth_mock() -> str:
     return str(USER_UUID)
 
 
+application = get_application()
 client: TestClient = TestClient(application)
 
 # Mock auth dependency and token middleware
