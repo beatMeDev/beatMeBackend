@@ -10,10 +10,6 @@ from unittest.mock import MagicMock
 import pytest
 
 from freezegun import freeze_time  # type: ignore
-from httpx import HTTPError
-from httpx import Request
-from httpx import Response
-from orjson import dumps  # pylint: disable-msg=E0611
 from truth.truth import AssertThat  # type: ignore
 
 from app.services.auth import FacebookAuth
@@ -21,35 +17,8 @@ from app.services.auth import GoogleAuth
 from app.services.auth import SpotifyAuth
 from app.services.auth import VKAuth
 from app.utils.exceptions import UnauthorizedError
+from tests.test_services.base import get_response_mock
 from tests.test_services.test_auth.test_base import endpoint_logic
-
-
-class ValidResponseMock(Response):
-    """External provider response mock."""
-
-    def raise_for_status(self) -> None:
-        """Httpx Response raise for status mock."""
-        return None
-
-
-class InvalidResponseMock(Response):
-    """External provider response mock."""
-
-    def raise_for_status(self) -> None:
-        """Httpx Response raise for status mock."""
-        raise HTTPError("test http error", response=self)
-
-
-def get_response_mock(method: str, response_data: Dict[str, Any], valid: bool):  # type: ignore
-    """Response mock factory."""
-    response_class = ValidResponseMock if valid is True else InvalidResponseMock
-    response = response_class(
-        status_code=200,
-        content=dumps(response_data),
-        request=Request(method=method.upper(), url="http://test.test"),
-    )
-
-    return response
 
 
 facebook_response_data: Dict[str, Any] = {

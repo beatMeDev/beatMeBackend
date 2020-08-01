@@ -68,7 +68,7 @@ class VKAuth(OAuthRoute):
         json_response = response.json()
         users = json_response.get("response", [])
 
-        if not users and not isinstance(users, list):
+        if not users or not isinstance(users, list):
             raise UnauthorizedError
 
         profile_info = users[0]

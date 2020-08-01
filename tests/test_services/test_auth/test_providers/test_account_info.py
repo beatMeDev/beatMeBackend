@@ -15,10 +15,8 @@ from app.services.auth import GoogleAuth
 from app.services.auth import SpotifyAuth
 from app.services.auth import VKAuth
 from app.utils.exceptions import UnauthorizedError
+from tests.test_services.base import get_response_mock
 from tests.test_services.test_auth.test_base import endpoint_logic
-from tests.test_services.test_auth.test_providers.test_code_auth import (
-    get_response_mock,
-)
 
 
 test_id: str = "test_id"

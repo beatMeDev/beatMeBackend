@@ -6,6 +6,7 @@ from typing import Tuple
 import pytest
 
 from starlette.testclient import TestClient
+from truth.truth import AssertThat  # type: ignore
 
 from app import application
 
@@ -32,4 +33,4 @@ def test_endpoint_exists(
     """
     response = client.request(method=method, url=endpoint, json=data)
 
-    assert response.status_code == expected_status
+    AssertThat(response.status_code).IsEqualTo(expected_status)

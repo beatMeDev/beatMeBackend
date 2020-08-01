@@ -8,6 +8,7 @@ import pytest
 
 from orjson import loads  # pylint: disable-msg=E0611
 from pydantic.main import BaseModel  # pylint: disable=no-name-in-module
+from truth.truth import AssertThat  # type: ignore
 
 from app.models.db import Playlist
 from app.models.db import Track
@@ -41,7 +42,7 @@ def test_format_track() -> None:
     """Check formatted track has valid format"""
     formatted_track: Optional[Dict[str, Any]] = format_track(track_info=RAW_TRACK)
 
-    assert TrackModel(**formatted_track).validate(formatted_track)  # type: ignore
+    AssertThat(TrackModel(**formatted_track).validate(formatted_track)).IsNotEmpty()  # type: ignore
 
 
 @pytest.mark.asyncio
@@ -59,6 +60,6 @@ async def test_add_tracks_to_playlist() -> None:
         playlists=playlist, spotify_id=track_spotify_id
     ).first()
 
-    assert is_added is True
-    assert track
-    assert track.spotify_id == track_spotify_id
+    AssertThat(is_added).IsTrue()
+    AssertThat(track).IsNotNone()
+    AssertThat(track.spotify_id).IsEqualTo(track_spotify_id)  # type: ignore
