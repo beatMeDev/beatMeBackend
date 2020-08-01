@@ -32,7 +32,8 @@ challenges_router = APIRouter()  # pylint: disable-msg=C0103
 
 @challenges_router.post("/", response_model=ChallengeOut)
 async def create_challenge_route(
-        challenge_data: ChallengeIn, user_id: str = Depends(bearer_auth)
+        challenge_data: ChallengeIn,
+        user_id: str = Depends(bearer_auth),
 ) -> PydanticModel:
     """
     Create challenge.
