@@ -45,13 +45,27 @@ def test_format_track() -> None:
     AssertThat(TrackModel(**formatted_track).validate(formatted_track)).IsNotEmpty()  # type: ignore
 
 
+def test_format_track_empty_track() -> None:
+    """Check formatted track is None when track data is empty."""
+    formatted_track: Optional[Dict[str, Any]] = format_track(track_info={})
+
+    AssertThat(formatted_track).IsNone()
+
+
+def test_format_track_empty_track_id() -> None:
+    """Check formatted track is None when track id is None."""
+    formatted_track: Optional[Dict[str, Any]] = format_track(track_info={"track": {"name": "test"}})
+
+    AssertThat(formatted_track).IsNone()
+
+
 @pytest.mark.asyncio
 async def test_add_tracks_to_playlist() -> None:
     """Check tracks added to playlist."""
     playlist: Playlist = await Playlist.create(
         name="test", url="test", spotify_id="test", recommended=True,
     )
-    raw_tracks: List[Dict[str, Any]] = [RAW_TRACK]
+    raw_tracks: List[Dict[str, Any]] = [RAW_TRACK, {}]
     formatted_track: Optional[Dict[str, Any]] = format_track(RAW_TRACK)
     track_spotify_id: str = formatted_track["spotify_id"]  # type: ignore
 
