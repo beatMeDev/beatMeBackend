@@ -30,7 +30,7 @@ application.dependency_overrides[bearer_auth] = bearer_auth_mock
 application.user_middleware = []
 application.middleware_stack = application.build_middleware_stack()
 
-challenge_data: Dict[str, Any] = {
+valid_challenge_data: Dict[str, Any] = {
     "name": "string",
     "challenge_end": "2020-01-01T00:00:00.000Z",
     "vote_end": "2020-01-02T00:00:00.000Z",
@@ -38,16 +38,32 @@ challenge_data: Dict[str, Any] = {
     "is_open": True,
     "track_id": POPULATE_TRACK_ID,
 }
+challenge_data_challenge_end_invalid = {
+    **valid_challenge_data,
+    "challenge_end": "2018-01-01T00:00:00.000Z",
+}
+challenge_data_vote_end_less_start = {
+    **valid_challenge_data,
+    "challenge_end": "2020-01-02:00:00.000Z",
+    "vote_end": "2020-01-01T00:00:00.000Z",
+}
+challenge_data_empty_name = {
+    **valid_challenge_data,
+    "name": "",
+}
 
 requests: List[Tuple[str, str, Dict[str, str], int]] = [
-    ("POST", "/api/challenges/", challenge_data, 200),
+    ("POST", "/api/challenges/", valid_challenge_data, 200),
+    ("POST", "/api/challenges/", challenge_data_challenge_end_invalid, 422),
+    ("POST", "/api/challenges/", challenge_data_vote_end_less_start, 422),
+    ("POST", "/api/challenges/", challenge_data_empty_name, 422),
     ("GET", "/api/challenges/", {}, 200),
     ("GET", "/api/challenges/my/", {}, 200),
     ("GET", "/api/challenges/participant/", {}, 200),
 ]
 
 
-@freeze_time("1970-01-01")
+@freeze_time("2019-01-01")
 @pytest.mark.parametrize(  # pylint: disable=not-callable
     "method,endpoint,data,expected_status", requests
 )  # pylint: disable=too-many-arguments
