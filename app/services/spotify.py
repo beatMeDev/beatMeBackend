@@ -37,7 +37,8 @@ async def get_playlist_id(string: str) -> Optional[str]:
 
 
 async def get_playlist_info(
-        playlist_id: str, access_token: str
+        playlist_id: str,
+        access_token: str,
 ) -> Tuple[Dict[str, str], List[Dict[str, Any]]]:
     """
     Get playlist tracks.
@@ -62,7 +63,7 @@ async def get_playlist_info(
 
     tracks: List[Dict[str, Any]] = response_data.get("tracks", {}).get("items", [])
     playlist_info: Dict[str, str] = {
-        "url": url,
+        "url": response_data.get("external_urls", {}).get("spotify"),
         "name": response_data.get("name"),
         "spotify_id": playlist_id,
     }

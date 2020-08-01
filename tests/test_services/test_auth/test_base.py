@@ -31,6 +31,7 @@ from app.services.auth.base import logout
 from app.services.auth.base import refresh_tokens
 from app.settings import JWT_ALGORITHM
 from app.settings import JWT_SECRET
+from app.utils.exceptions import BadRequestError
 from app.utils.exceptions import UnauthorizedError
 
 
@@ -186,6 +187,19 @@ async def test_base_auth_route_on_get() -> None:
 
     AssertThat(response.status_code).IsEqualTo(200)
     AssertThat(response_body).IsEqualTo({"link": REDIRECT_LINK})
+
+
+@pytest.mark.asyncio
+async def test_base_auth_route_on_put() -> None:
+    """
+    Check auth handler on PUT should return Bad Request.
+    """
+    route = get_patched_route()
+    route_handler = route.get_route_handler()
+    request: Request = await get_auth_request(method="PUT")
+
+    with AssertThat(BadRequestError).IsRaised():
+        await route_handler(request)
 
 
 @pytest.mark.asyncio

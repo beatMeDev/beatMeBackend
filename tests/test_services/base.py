@@ -24,11 +24,16 @@ class InvalidResponseMock(Response):
         raise HTTPError("test http error", response=self)
 
 
-def get_response_mock(method: str, response_data: Dict[str, Any], valid: bool):  # type: ignore
+def get_response_mock(  # type: ignore
+        method: str,
+        response_data: Dict[str, Any],
+        valid: bool,
+        status: int = 200,
+):
     """Response mock factory."""
     response_class = ValidResponseMock if valid is True else InvalidResponseMock
     response = response_class(
-        status_code=200,
+        status_code=status,
         content=dumps(response_data),
         request=Request(method=method.upper(), url="http://test.test"),
     )
