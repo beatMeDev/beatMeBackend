@@ -80,7 +80,7 @@ async def get_auth_request(method: str, user_id: Optional[str] = None) -> Reques
         "method": method,
         "query_params": QueryParams(code="test"),
         "query_string": b"code=test",
-        "headers": {},
+        "headers": [],
     }
 
     if user_id:

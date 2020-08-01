@@ -5,6 +5,7 @@ from unittest import mock
 from unittest.mock import MagicMock
 
 import pytest
+
 from freezegun import freeze_time  # type: ignore
 from truth.truth import AssertThat  # type: ignore
 
@@ -16,6 +17,7 @@ from app.services.auth.providers.spotify import spotify_auth
 from app.utils.exceptions import UnauthorizedError
 from tests.test_services.base import get_response_mock
 from tests.test_services.test_auth.test_base import USER_UUID
+
 
 auth_account_data: Dict[str, Any] = {
     "_id": "test",
