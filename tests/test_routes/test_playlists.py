@@ -9,13 +9,15 @@ from starlette.testclient import TestClient
 from truth.truth import AssertThat  # type: ignore
 
 from app import get_application
+from tests.conftest import mock_auth
 
 
 application = get_application()
 client: TestClient = TestClient(application)
+application = mock_auth(application)
 
 requests: List[Tuple[str, str, Dict[str, str], int]] = [
-    ("POST", "/api/playlists/", {}, 403),
+    ("POST", "/api/playlists/", {}, 401),
 ]
 
 

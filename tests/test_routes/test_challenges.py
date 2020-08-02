@@ -12,7 +12,10 @@ from starlette.testclient import TestClient
 from truth.truth import AssertThat  # type: ignore
 
 from app import get_application
+from tests.conftest import POPULATE_CHALLENGE_FOREIGN_ID as FOREIGN_ID
+from tests.conftest import POPULATE_CHALLENGE_FOREIGN_SECRET as FOREIGN_SECRET
 from tests.conftest import POPULATE_CHALLENGE_ID
+from tests.conftest import POPULATE_CHALLENGE_SECRET
 from tests.conftest import POPULATE_TRACK_ID
 from tests.conftest import mock_auth
 
@@ -90,6 +93,119 @@ def test_endpoint_exists(  # type: ignore
         method=method,
         url=endpoint,
         json=data,
+    )
+
+    AssertThat(response.status_code).IsEqualTo(expected_status)
+
+
+secret_no_access_requests: List[Tuple[str, str, Dict[str, str], int]] = [
+    ("GET", f"/api/challenges/{str(FOREIGN_ID)}/?secret=trash", {}, 403),
+    ("POST", f"/api/challenges/{str(FOREIGN_ID)}/accept/?secret=trash", {}, 403),
+    ("POST", f"/api/challenges/{str(FOREIGN_ID)}/submit/?secret=trash", submit_valid_data, 403),
+]
+
+
+@pytest.mark.parametrize(  # pylint: disable=not-callable
+    "method,endpoint,data,expected_status", secret_no_access_requests
+)  # pylint: disable=too-many-arguments
+def test_secret_without_access(  # type: ignore
+        method: str,
+        endpoint: str,
+        data: Dict[str, str],
+        expected_status: int,
+        user_fixture,  # pylint: disable=unused-argument
+        challenge_foreign_fixture,  # pylint: disable=unused-argument
+) -> None:
+    """Check endpoints when user has no access and secret."""
+    response = client.request(
+        method=method,
+        url=endpoint,
+        json=data,
+        params={"secret": "trash"}
+    )
+
+    AssertThat(response.status_code).IsEqualTo(expected_status)
+
+
+secret_with_access_requests: List[Tuple[str, str, Dict[str, str], int]] = [
+    ("GET", f"/api/challenges/{str(FOREIGN_ID)}/", {}, 200),
+    ("POST", f"/api/challenges/{str(FOREIGN_ID)}/accept/", {}, 200),
+    ("POST", f"/api/challenges/{str(FOREIGN_ID)}/submit/", submit_valid_data, 200),
+]
+
+
+@pytest.mark.parametrize(  # pylint: disable=not-callable
+    "method,endpoint,data,expected_status", secret_with_access_requests
+)  # pylint: disable=too-many-arguments
+def test_secret_with_access(  # type: ignore
+        method: str,
+        endpoint: str,
+        data: Dict[str, str],
+        expected_status: int,
+        user_fixture,  # pylint: disable=unused-argument
+        challenge_foreign_fixture,  # pylint: disable=unused-argument
+) -> None:
+    """Check endpoints when user has access and secret."""
+    response = client.request(
+        method=method,
+        url=endpoint,
+        json=data,
+        params={"secret": str(FOREIGN_SECRET)}
+    )
+
+    AssertThat(response.status_code).IsEqualTo(expected_status)
+
+
+ended_requests: List[Tuple[str, str, Dict[str, str], int]] = [
+    ("POST", f"/api/challenges/{str(POPULATE_CHALLENGE_ID)}/accept/", {}, 403),
+    ("POST", f"/api/challenges/{str(POPULATE_CHALLENGE_ID)}/submit/", submit_valid_data, 403),
+]
+
+
+@pytest.mark.parametrize(  # pylint: disable=not-callable
+    "method,endpoint,data,expected_status", ended_requests
+)  # pylint: disable=too-many-arguments
+def test_ended_challenge(  # type: ignore
+        method: str,
+        endpoint: str,
+        data: Dict[str, str],
+        expected_status: int,
+        user_fixture,  # pylint: disable=unused-argument
+        challenge_end_fixture,  # pylint: disable=unused-argument
+) -> None:
+    """Check endpoints when challenge is ended."""
+    response = client.request(
+        method=method,
+        url=endpoint,
+        json=data,
+        params={"secret": str(POPULATE_CHALLENGE_SECRET)}
+    )
+
+    AssertThat(response.status_code).IsEqualTo(expected_status)
+
+
+submission_requests = [
+    ("POST", f"/api/challenges/{str(POPULATE_CHALLENGE_ID)}/submit/", submit_valid_data, 200),
+]
+
+
+@pytest.mark.parametrize(  # pylint: disable=not-callable
+    "method,endpoint,data,expected_status", submission_requests
+)  # pylint: disable=too-many-arguments
+def test_exist_submission(  # type: ignore
+        method: str,
+        endpoint: str,
+        data: Dict[str, str],
+        expected_status: int,
+        user_fixture,  # pylint: disable=unused-argument
+        submission_fixture,  # pylint: disable=unused-argument
+) -> None:
+    """Check endpoints when submission exists."""
+    response = client.request(
+        method=method,
+        url=endpoint,
+        json=data,
+        params={"secret": str(POPULATE_CHALLENGE_SECRET)}
     )
 
     AssertThat(response.status_code).IsEqualTo(expected_status)

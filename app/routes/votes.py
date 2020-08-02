@@ -37,6 +37,9 @@ async def make_vote_route(
     if now_time < submission.challenge.challenge_end:  # type: ignore
         raise HTTPException(status_code=400, detail={"message": "Too early"})
 
+    if now_time > submission.challenge.vote_end:  # type: ignore
+        raise HTTPException(status_code=400, detail={"message": "Too late"})
+
     vote: Optional[Vote] = await Vote.filter(
         submission__challenge=submission.challenge, user_id=user_id
     ).first()

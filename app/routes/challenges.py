@@ -176,6 +176,7 @@ async def add_submission_route(
         challenge_id: UUID,
         submission_data: SubmissionIn,
         user_id: str = Depends(bearer_auth),
+        secret: Optional[str] = None,
 ) -> PydanticModel:
     """
     Submit track for a challenge.
@@ -184,9 +185,17 @@ async def add_submission_route(
     :param challenge_id: challenge id
     :param submission_data: submission data(url)
     :param user_id: user's id
+    :param secret: challenge access secret key
     :return: submission
     """
     challenge: Challenge = await Challenge.get(id=challenge_id)
+
+    if challenge.is_public is False:
+        challenge.check_secret(secret=secret)
+
+    if challenge.challenge_end < datetime.utcnow():
+        raise PermissionsDeniedError
+
     submission: Optional[Submission] = await Submission.filter(
         challenge=challenge, user_id=user_id
     ).first()
