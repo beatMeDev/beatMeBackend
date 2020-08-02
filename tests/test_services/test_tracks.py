@@ -45,6 +45,15 @@ def test_format_track() -> None:
     AssertThat(TrackModel(**formatted_track).validate(formatted_track)).IsNotEmpty()  # type: ignore
 
 
+def test_format_track_without_cover() -> None:
+    """Check formatted track has valid format even no album cover."""
+    track_no_cover = RAW_TRACK.copy()
+    track_no_cover["track"]["album"]["images"] = []
+    formatted_track: Optional[Dict[str, Any]] = format_track(track_info=RAW_TRACK)
+
+    AssertThat(TrackModel(**formatted_track).validate(formatted_track)).IsNotEmpty()  # type: ignore
+
+
 def test_format_track_empty_track() -> None:
     """Check formatted track is None when track data is empty."""
     formatted_track: Optional[Dict[str, Any]] = format_track(track_info={})

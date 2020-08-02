@@ -30,7 +30,7 @@ def format_track(track_info: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     )
     track_name: Optional[str] = raw_track_data.get("name")
     cover_images: List[Dict[str, Any]] = raw_album_data.get("images", [])
-    cover_image: Optional[str] = None
+    cover_image: Optional[str] = ""
 
     if cover_images:
         cover_image = cover_images[0].get("url")

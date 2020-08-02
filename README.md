@@ -22,7 +22,6 @@
 - [x] Populate recommended playlists
 - [ ] Challenge statistics/scoreboard
 - [ ] Search track on youtube
-- [ ] 100% coverage
 
 ## Installation
 

@@ -1,1 +1,1 @@
-python -m pytest tests/ --cov=app --cov-branch --cov-fail-under=50 --cov-report=xml
+python -m  pytest --cov=app --cov-report=xml --cov-config=.coveragerc tests/
