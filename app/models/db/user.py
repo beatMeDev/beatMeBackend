@@ -1,6 +1,5 @@
 """User models"""
 from enum import Enum
-from typing import Iterator
 from typing import List
 
 from tortoise import fields
@@ -16,9 +15,6 @@ class AuthProvider(str, Enum):
     GOOGLE = "GOOGLE"
     VK = "VK"
     FACEBOOK = "FACEBOOK"
-
-    def __iter__(self) -> Iterator[str]:
-        return iter([self.SPOTIFY, self.GOOGLE, self.VK, self.FACEBOOK])
 
 
 class User(BaseModel):

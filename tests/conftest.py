@@ -81,7 +81,8 @@ def mock_auth(application: FastAPI) -> FastAPI:
 @pytest.mark.asyncio
 async def populate_texts() -> Text:
     """Populate text for utils routes tests."""
-    return await Text.create(content="test")
+    text, _ = await Text.get_or_create(content="test")
+    return text
 
 
 test_track_info: Dict[str, Any] = {
@@ -151,6 +152,7 @@ async def populate_user(user_id: Optional[UUID] = USER_UUID) -> User:
         expires=0,
     )
     await user.auth_accounts.add(auth_account)
+    await user.fetch_related("auth_accounts")
 
     return user
 
