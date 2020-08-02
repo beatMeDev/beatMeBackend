@@ -1,6 +1,4 @@
 """Challenge models"""
-from datetime import datetime
-from datetime import timedelta
 from typing import Dict
 from typing import Optional
 
@@ -15,36 +13,12 @@ from app.settings import JWT_ALGORITHM
 from app.utils.exceptions import PermissionsDeniedError
 
 
-def challenge_end_date(days: int = 1) -> datetime:
-    """
-    Default challenge end date
-    :param days: how much days challenge will be open
-    :return: end date
-    """
-    now_time = datetime.utcnow()
-    end_date = now_time + timedelta(days=days)
-
-    return end_date
-
-
-def vote_end_date(days: int = 2) -> datetime:
-    """
-    Default voting end date
-    :param days: how much days voting will be open
-    :return: end date
-    """
-    now_time = datetime.utcnow()
-    end_date = now_time + timedelta(days=days)
-
-    return end_date
-
-
 class Challenge(BaseModel):
     """Challenge model."""
 
     name = fields.CharField(max_length=255, null=True)
-    challenge_end = fields.DatetimeField(null=True, default=challenge_end_date)
-    vote_end = fields.DatetimeField(null=True, default=vote_end_date)
+    challenge_end = fields.DatetimeField(null=False)
+    vote_end = fields.DatetimeField(null=False)
     is_public = fields.BooleanField(null=True, default=True)
     is_open = fields.BooleanField(null=True, default=True)
     owner = fields.ForeignKeyField("models.User", related_name="own_challenges")

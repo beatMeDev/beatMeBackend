@@ -203,7 +203,7 @@ async def bearer_auth(
             HTTPBearer()
         ),  # pylint: disable=unused-argument
 ) -> Optional[str]:
-    """Auth dependence."""
+    """Auth dependence, scope data set in TokenAuthMiddleware."""
     token_data: Dict[str, str] = request.scope.get("token_data", {})
     user_id: Optional[str] = token_data.get("user_id")
 

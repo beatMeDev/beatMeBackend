@@ -1,4 +1,6 @@
 """Test challenges endpoints"""
+from datetime import datetime
+from datetime import timedelta
 from typing import Any
 from typing import Dict
 from typing import List
@@ -6,54 +8,57 @@ from typing import Tuple
 
 import pytest
 
-from freezegun import freeze_time  # type: ignore
 from starlette.testclient import TestClient
 from truth.truth import AssertThat  # type: ignore
 
 from app import get_application
-from app.services.auth.base import bearer_auth
+from tests.conftest import POPULATE_CHALLENGE_ID
 from tests.conftest import POPULATE_TRACK_ID
-from tests.test_services.test_auth.test_base import USER_UUID
-
-
-async def bearer_auth_mock() -> str:
-    """Auth method mock."""
-    return str(USER_UUID)
+from tests.conftest import mock_auth
 
 
 application = get_application()
 client: TestClient = TestClient(application)
+application = mock_auth(application)
 
-# Mock auth dependency and token middleware
-application.dependency_overrides[bearer_auth] = bearer_auth_mock
-
-application.user_middleware = []
-application.middleware_stack = application.build_middleware_stack()
-
+date_format: str = "%Y-%m-%dT%H:%M:%S.000Z"
 valid_challenge_data: Dict[str, Any] = {
     "name": "string",
-    "challenge_end": "2020-01-01T00:00:00.000Z",
-    "vote_end": "2020-01-02T00:00:00.000Z",
+    "challenge_end": (datetime.utcnow() + timedelta(hours=1)).strftime(date_format),
+    "vote_end": (datetime.utcnow() + timedelta(hours=2)).strftime(date_format),
     "is_public": True,
     "is_open": True,
     "track_id": POPULATE_TRACK_ID,
 }
 challenge_data_challenge_end_invalid = {
     **valid_challenge_data,
-    "challenge_end": "2018-01-01T00:00:00.000Z",
+    "challenge_end": (datetime.utcnow() - timedelta(days=1)).strftime(date_format),
 }
 challenge_data_vote_end_less_start = {
     **valid_challenge_data,
-    "challenge_end": "2020-01-02:00:00.000Z",
-    "vote_end": "2020-01-01T00:00:00.000Z",
+    "challenge_end": (datetime.utcnow() + timedelta(hours=2)).strftime(date_format),
+    "vote_end": (datetime.utcnow() + timedelta(hours=1)).strftime(date_format),
 }
 challenge_data_empty_name = {
     **valid_challenge_data,
     "name": "",
 }
 
+submit_valid_data: Dict[str, str] = {
+    "url": "https://soundcloud.com/test/test",
+}
+submit_invalid_data: Dict[str, str] = {
+    "url": "https://google.com/"
+}
+
 requests: List[Tuple[str, str, Dict[str, str], int]] = [
     ("POST", "/api/challenges/", valid_challenge_data, 200),
+    ("POST", f"/api/challenges/{str(POPULATE_CHALLENGE_ID)}/accept/", {}, 200),
+    ("GET", f"/api/challenges/{str(POPULATE_CHALLENGE_ID)}/participants/", {}, 200),
+    ("POST", f"/api/challenges/{str(POPULATE_CHALLENGE_ID)}/submit/", submit_valid_data, 200),
+    ("POST", f"/api/challenges/{str(POPULATE_CHALLENGE_ID)}/submit/", submit_invalid_data, 422),
+    ("GET", f"/api/challenges/{str(POPULATE_CHALLENGE_ID)}/submissions/", {}, 200),
+    ("GET", f"/api/challenges/{str(POPULATE_CHALLENGE_ID)}/", {}, 200),
     ("POST", "/api/challenges/", challenge_data_challenge_end_invalid, 422),
     ("POST", "/api/challenges/", challenge_data_vote_end_less_start, 422),
     ("POST", "/api/challenges/", challenge_data_empty_name, 422),
@@ -63,7 +68,6 @@ requests: List[Tuple[str, str, Dict[str, str], int]] = [
 ]
 
 
-@freeze_time("2019-01-01")
 @pytest.mark.parametrize(  # pylint: disable=not-callable
     "method,endpoint,data,expected_status", requests
 )  # pylint: disable=too-many-arguments
@@ -72,8 +76,8 @@ def test_endpoint_exists(  # type: ignore
         endpoint: str,
         data: Dict[str, str],
         expected_status: int,
-        populate_user,  # pylint: disable=unused-argument
-        populate_playlist_with_track,  # pylint: disable=unused-argument
+        user_fixture,  # pylint: disable=unused-argument
+        challenge_process_fixture,  # pylint: disable=unused-argument
 ) -> None:
     """
     Check endpoint exists

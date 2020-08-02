@@ -19,6 +19,7 @@ from app.services.auth import VKAuth
 from app.services.auth.base import bearer_auth
 from app.services.auth.base import logout
 from app.services.auth.base import refresh_tokens
+from app.utils.exceptions import UnauthorizedError
 
 
 async def process_auth_route(code: Optional[str] = None) -> None:  # pylint: disable=unused-argument
@@ -62,7 +63,10 @@ async def refresh_route(
         user_id: str = Depends(bearer_auth),  # pylint: disable=unused-argument
 ) -> AuthOut:
     """Refresh user tokens endpoint."""
-    refresh_token: str = request.scope["token"]
+    refresh_token: Optional[str] = request.scope.get("token")
+
+    if not refresh_token:
+        raise UnauthorizedError
 
     tokens: Dict[str, Union[str, int]] = await refresh_tokens(
         refresh_token=refresh_token

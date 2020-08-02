@@ -29,7 +29,7 @@ def test_endpoint_exists(  # type: ignore
         endpoint: str,
         data: Dict[str, str],
         expected_status: int,
-        populate_track,  # pylint: disable=unused-argument
+        track_fixture,  # pylint: disable=unused-argument
 ) -> None:
     """
     Check endpoint exists

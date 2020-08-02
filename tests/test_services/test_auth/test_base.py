@@ -16,6 +16,7 @@ import jwt
 import pytest
 
 from fastapi.responses import ORJSONResponse
+from fastapi.security import HTTPAuthorizationCredentials
 from orjson import dumps  # pylint: disable-msg=E0611
 from orjson import loads  # pylint: disable-msg=E0611
 from starlette.datastructures import QueryParams
@@ -26,6 +27,7 @@ from app.models.api.auth import AuthOut
 from app.models.db.user import AuthAccount
 from app.models.db.user import User
 from app.services.auth.base import OAuthRoute
+from app.services.auth.base import bearer_auth
 from app.services.auth.base import create_tokens
 from app.services.auth.base import logout
 from app.services.auth.base import refresh_tokens
@@ -313,3 +315,26 @@ async def test_refresh_tokens_logout_false(
 
     with AssertThat(UnauthorizedError).IsRaised():
         await refresh_tokens(refresh_token="test_token")
+
+
+@pytest.mark.asyncio
+async def test_bearer_auth() -> None:
+    """Check bearer auth return user id from scope."""
+    request = Request(scope={
+        "type": "http",
+        "method": "GET",
+        "headers": [],
+        "token_data": {
+            "user_id": str(USER_UUID),
+        }
+    })
+    credentials: HTTPAuthorizationCredentials = HTTPAuthorizationCredentials(
+        scheme="test",
+        credentials="test",
+    )
+
+    user_id: Optional[str] = await bearer_auth(
+        request=request, http_credentials=credentials
+    )
+
+    AssertThat(user_id).IsEqualTo(str(USER_UUID))
