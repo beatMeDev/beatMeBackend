@@ -87,32 +87,24 @@ class OAuthRoute(APIRoute):
         account_info["refresh_token"] = refresh_token
         account_info["expires"] = expires
 
-        account_created: bool = False
-        user_created: bool = False
-
         auth_account: Optional[AuthAccount] = await AuthAccount.filter(
             _id=account_info["_id"]
-        ).first()
+        ).first().prefetch_related("user")
+
+        user: Optional[User] = await User.get(id=user_id) if user_id else None
 
         if auth_account:
             await auth_account.update_from_dict(data=account_info)
             await auth_account.save()
         else:
-            auth_account = await AuthAccount.create(**account_info)
-            account_created = True
+            if not user:
+                user = await User.create()
 
-        if user_id and account_created:
-            user = await User.get(id=user_id)
-        elif not user_id and not account_created:
-            user = await User.filter(auth_accounts__in=[auth_account]).first()  # type: ignore
-        else:
-            user = await User.create()
-            user_created = True
+            auth_account = await AuthAccount.create(**account_info, user=user)
 
-        if account_created or user_created:
-            await user.auth_accounts.add(auth_account)
-
-        tokens: Dict[str, Union[str, int]] = await create_tokens(user_id=str(user.id))
+        tokens: Dict[str, Union[str, int]] = await create_tokens(
+            user_id=str(auth_account.user.id)  # type: ignore
+        )
 
         return ORJSONResponse(tokens)
 
@@ -257,5 +249,17 @@ async def refresh_tokens(refresh_token: str) -> Dict[str, Union[str, int]]:
     tokens: Dict[str, Union[str, int]] = await create_tokens(
         user_id=token_data["user_id"]
     )
+
+    return tokens
+
+
+async def refresh_tokens_controller(request: Request) -> Dict[str, Union[str, int]]:
+    """Controller for using as dependency in routes."""
+    refresh_token: Optional[str] = request.scope.get("token")
+
+    if not refresh_token:
+        raise UnauthorizedError
+
+    tokens: Dict[str, Union[str, int]] = await refresh_tokens(refresh_token)
 
     return tokens

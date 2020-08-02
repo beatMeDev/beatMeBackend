@@ -31,6 +31,7 @@ from app.services.auth.base import bearer_auth
 from app.services.auth.base import create_tokens
 from app.services.auth.base import logout
 from app.services.auth.base import refresh_tokens
+from app.services.auth.base import refresh_tokens_controller
 from app.settings import JWT_ALGORITHM
 from app.settings import JWT_SECRET
 from app.utils.exceptions import BadRequestError
@@ -93,10 +94,11 @@ async def get_auth_request(method: str, user_id: Optional[str] = None) -> Reques
 
     return request
 
+
 not_implemented_methods: List[Any] = [
-    ("code_auth", {"code": "test"}, ),
-    ("get_account_info", {"access_token": "test"}, ),
-    ("create_auth_link", {}, ),
+    ("code_auth", {"code": "test"},),
+    ("get_account_info", {"access_token": "test"},),
+    ("create_auth_link", {},),
 ]
 
 
@@ -166,6 +168,60 @@ async def test_base_auth_route_on_post(set_mock: MagicMock) -> None:
     request: Request = await get_auth_request(method="POST")
 
     response: ORJSONResponse = await route_handler(request)
+    response_body = loads(response.body)
+    auth_account: AuthAccount = await AuthAccount.get(_id=AUTH_ACCOUNT_ID)
+    user: User = await User.get(auth_accounts__in=[auth_account])
+
+    AssertThat(AuthOut(**response_body).validate(response_body)).IsNotEmpty()
+    AssertThat(auth_account).IsNotNone()
+    AssertThat(user).IsNotNone()
+
+
+@pytest.mark.asyncio
+@mock.patch("app.extensions.redis_client.set")
+async def test_base_auth_route_on_post_user_created(
+        set_mock: MagicMock,
+        user_fixture: User,
+) -> None:
+    """
+    Check auth handler when AuthAccount is not exists, but User exists and logged in,
+    AuthAccount should be created and added for user,
+    tokens should be returned.
+    """
+    set_mock.return_value = asyncio.Future()
+    set_mock.return_value.set_result(True)
+    route = get_patched_route()
+    route_handler = route.get_route_handler()
+    request: Request = await get_auth_request(method="POST", user_id=str(user_fixture.id))
+
+    response: ORJSONResponse = await route_handler(request)
+    response_body = loads(response.body)
+    auth_account: AuthAccount = await AuthAccount.get(_id=AUTH_ACCOUNT_ID, user=user_fixture)
+    user: User = await User.get(auth_accounts__in=[auth_account])
+
+    AssertThat(AuthOut(**response_body).validate(response_body)).IsNotEmpty()
+    AssertThat(auth_account).IsNotNone()
+    AssertThat(user).IsNotNone()
+
+
+@pytest.mark.asyncio
+@mock.patch("app.extensions.redis_client.set")
+async def test_base_auth_route_on_post_auth_account_created(
+        set_mock: MagicMock,
+) -> None:
+    """
+    Check auth handler when AuthAccount is not exists, but User exists and logged in,
+    AuthAccount should be created and added for user,
+    tokens should be returned.
+    """
+    set_mock.return_value = asyncio.Future()
+    set_mock.return_value.set_result(True)
+    route = get_patched_route()
+    route_handler = route.get_route_handler()
+    request: Request = await get_auth_request(method="POST")
+    await route_handler(request)  # call first time and auth account will created
+
+    response: ORJSONResponse = await route_handler(request)  # here account should be created
     response_body = loads(response.body)
     auth_account: AuthAccount = await AuthAccount.get(_id=AUTH_ACCOUNT_ID)
     user: User = await User.get(auth_accounts__in=[auth_account])
@@ -338,3 +394,34 @@ async def test_bearer_auth() -> None:
     )
 
     AssertThat(user_id).IsEqualTo(str(USER_UUID))
+
+
+@pytest.mark.asyncio
+async def test_refresh_tokens_controller_empty_token() -> None:
+    """Check controller is raised if request scope has no token."""
+    request: Request = Request(scope={
+        "type": "http",
+        "method": "GET",
+        "headers": [],
+    })
+
+    with AssertThat(UnauthorizedError).IsRaised():
+        await refresh_tokens_controller(request=request)
+
+
+@pytest.mark.asyncio
+@mock.patch("app.services.auth.base.refresh_tokens")
+async def test_refresh_tokens_controller(refresh_tokens_mock: MagicMock) -> None:
+    """Check controller if everything is fine."""
+    test_value: bool = True
+    refresh_tokens_mock.return_value = test_value
+    request: Request = Request(scope={
+        "type": "http",
+        "method": "GET",
+        "headers": [],
+        "token": "test",
+    })
+
+    result = await refresh_tokens_controller(request=request)
+
+    AssertThat(result).IsEqualTo(test_value)

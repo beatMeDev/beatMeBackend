@@ -1,18 +1,10 @@
 """Setup FastAPI application"""
-import sys
-import warnings
-
-from typing import Dict
-from typing import Union
-
-import aioredis
 
 from fastapi import APIRouter
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from tortoise.contrib.fastapi import register_tortoise
 
-from app.extensions import redis_client
 from app.routes.auth import auth_router
 from app.routes.challenges import challenges_router
 from app.routes.playlists import playlists_router
@@ -22,11 +14,8 @@ from app.routes.users import router as users_route
 from app.routes.utils import utils_router
 from app.routes.votes import votes_router
 from app.services.auth.middleware import TokenAuthMiddleware
-from app.settings import REDIS_DB
-from app.settings import REDIS_HOST
-from app.settings import REDIS_PASSWORD
-from app.settings import REDIS_PORT
 from app.settings import TORTOISE_CONFIG
+from app.utils.redis import register_redis
 
 
 def get_application() -> FastAPI:
@@ -43,6 +32,7 @@ def get_application() -> FastAPI:
         generate_schemas=True,
         add_exception_handlers=True,
     )
+    register_redis(app)
 
     # Router section
     router = APIRouter()
@@ -69,30 +59,5 @@ def get_application() -> FastAPI:
         allow_headers=["*"],
     )
     app.add_middleware(TokenAuthMiddleware)
-
-    @app.on_event("startup")
-    async def startup() -> None:  # pylint: disable=unused-variable
-        """On startup app init redis connection"""
-        redis_kwargs: Dict[str, Union[str, int]] = {
-            "address": f"redis://{REDIS_HOST}:{REDIS_PORT}",
-            "db": REDIS_DB,
-            "password": REDIS_PASSWORD,
-        }
-        redis_kwargs = {key: value for key, value in redis_kwargs.items() if value}
-
-        try:
-            redis_pool: aioredis.ConnectionsPool = await aioredis.create_redis_pool(
-                **redis_kwargs
-            )
-        except ConnectionRefusedError:
-            warnings.warn("REDIS error, check connection settings")
-            sys.exit()
-
-        redis_client.__init__(redis_pool)
-
-    @app.on_event("shutdown")
-    async def shutdown() -> None:  # pylint: disable=unused-variable
-        """On shutdown app close redis connection"""
-        redis_client.close()
 
     return app

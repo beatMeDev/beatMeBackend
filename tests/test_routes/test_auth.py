@@ -1,4 +1,5 @@
 """Test auth endpoints"""
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Tuple
@@ -9,12 +10,24 @@ from starlette.testclient import TestClient
 from truth.truth import AssertThat  # type: ignore
 
 from app import get_application
+from app.services.auth.base import refresh_tokens_controller
 from tests.conftest import mock_auth
 
 
 application = get_application()
 client: TestClient = TestClient(application)
 application = mock_auth(application)
+
+
+async def refresh_tokens_controller_mock() -> Dict[str, Any]:
+    """Mock refresh tokens controller."""
+    return {
+        "access_token": "test",
+        "refresh_token": "test",
+        "expires_at": 0,
+    }
+
+application.dependency_overrides[refresh_tokens_controller] = refresh_tokens_controller_mock
 
 requests: List[Tuple[str, str, Dict[str, str], int]] = [
     ("POST", "/api/auth/facebook/", {}, 400),
@@ -26,7 +39,7 @@ requests: List[Tuple[str, str, Dict[str, str], int]] = [
     ("POST", "/api/auth/vk/", {}, 400),
     ("GET", "/api/auth/vk/", {}, 200),
     ("POST", "/api/auth/logout/", {}, 200),
-    ("POST", "/api/auth/refresh/", {}, 401),
+    ("POST", "/api/auth/refresh/", {}, 200),
 ]
 
 

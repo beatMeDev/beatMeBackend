@@ -19,10 +19,7 @@ class AuthProvider(str, Enum):
 
 class User(BaseModel):
     """User model."""
-
-    auth_accounts = fields.ManyToManyField(
-        "models.AuthAccount", related_name="users", through="users_auth_accounts",
-    )
+    auth_accounts: fields.ReverseRelation["AuthAccount"]
 
     def name(self) -> str:
         """Last auth account name."""
@@ -81,6 +78,8 @@ class AuthAccount(BaseModel):
     access_token = fields.CharField(max_length=1024, null=True)
     refresh_token = fields.CharField(max_length=1024, null=True)
     expires = fields.IntField(null=True)
+
+    user = fields.ForeignKeyField("models.User", related_name="auth_accounts")
 
     class PydanticMeta:  # pylint: disable=too-few-public-methods
         """Serializations options."""

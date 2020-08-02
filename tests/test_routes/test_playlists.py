@@ -5,10 +5,12 @@ from typing import Tuple
 
 import pytest
 
+from fastapi.responses import ORJSONResponse
 from starlette.testclient import TestClient
 from truth.truth import AssertThat  # type: ignore
 
 from app import get_application
+from app.services.playlists import create_playlist_controller
 from tests.conftest import mock_auth
 
 
@@ -16,8 +18,16 @@ application = get_application()
 client: TestClient = TestClient(application)
 application = mock_auth(application)
 
+
+async def create_playlist_controller_mock() -> ORJSONResponse:
+    """Controller mock."""
+    return ORJSONResponse()
+
+
+application.dependency_overrides[create_playlist_controller] = create_playlist_controller_mock
+
 requests: List[Tuple[str, str, Dict[str, str], int]] = [
-    ("POST", "/api/playlists/", {}, 401),
+    ("POST", "/api/playlists/", {}, 200),
 ]
 
 

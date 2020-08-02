@@ -137,11 +137,11 @@ async def playlist_fixture() -> Playlist:
 
 async def populate_user(user_id: Optional[UUID] = USER_UUID) -> User:
     """Populate user for routes testing."""
-    if not user_id:
-        user_id = uuid4()
+    # if not user_id:
+    #     user_id = uuid4()
 
     user, _ = await User.get_or_create(id=user_id)
-    auth_account, _ = await AuthAccount.get_or_create(
+    await AuthAccount.get_or_create(
         _id="test",
         name="test",
         image="test",
@@ -150,8 +150,8 @@ async def populate_user(user_id: Optional[UUID] = USER_UUID) -> User:
         access_token="test",
         refresh_token="test",
         expires=0,
+        user=user,
     )
-    await user.auth_accounts.add(auth_account)
     await user.fetch_related("auth_accounts")
 
     return user

@@ -18,8 +18,7 @@ from app.services.auth import SpotifyAuth
 from app.services.auth import VKAuth
 from app.services.auth.base import bearer_auth
 from app.services.auth.base import logout
-from app.services.auth.base import refresh_tokens
-from app.utils.exceptions import UnauthorizedError
+from app.services.auth.base import refresh_tokens_controller
 
 
 async def process_auth_route(code: Optional[str] = None) -> None:  # pylint: disable=unused-argument
@@ -59,18 +58,10 @@ async def logout_route(
 
 @auth_router.post("/refresh/", response_model=AuthOut, summary="Refresh tokens")
 async def refresh_route(
-        request: Request,
         user_id: str = Depends(bearer_auth),  # pylint: disable=unused-argument
+        tokens: Dict[str, Union[str, int]] = Depends(refresh_tokens_controller)
 ) -> AuthOut:
     """Refresh user tokens endpoint."""
-    refresh_token: Optional[str] = request.scope.get("token")
-
-    if not refresh_token:
-        raise UnauthorizedError
-
-    tokens: Dict[str, Union[str, int]] = await refresh_tokens(
-        refresh_token=refresh_token
-    )
     response: AuthOut = AuthOut(**tokens)  # type: ignore
 
     return response

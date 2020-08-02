@@ -104,7 +104,7 @@ async def spotify_auth(
         raise UnauthorizedError
 
     auth_account: Optional[AuthAccount] = await AuthAccount.filter(
-        users__id=user_id, provider=AuthProvider.SPOTIFY
+        user_id=user_id, provider=AuthProvider.SPOTIFY
     ).first()
 
     if not auth_account:

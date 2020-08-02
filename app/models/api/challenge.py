@@ -33,10 +33,13 @@ class ChallengeIn(BaseModel):
     track_id: UUID
 
     @validator("vote_end")
-    def vote_end_greater_end_data(
+    def vote_end_validator(
         cls, value: datetime, values: Dict[str, Any]
     ) -> datetime:
         """Validate vote end date."""
+        if value.replace(tzinfo=None) < datetime.utcnow():
+            raise ValueError("must be greater than `now`")
+
         challenge_end: Optional[datetime] = values.get("challenge_end")
 
         if not challenge_end:
@@ -47,18 +50,8 @@ class ChallengeIn(BaseModel):
 
         raise ValueError("must be greater than `challenge_end`")
 
-    @validator("vote_end")
-    def vote_end_greater_now(cls, value: datetime) -> datetime:
-        """Validate vote end date."""
-        now = datetime.utcnow()
-
-        if now <= value.replace(tzinfo=None):
-            return value
-
-        raise ValueError("must be greater than `now`")
-
     @validator("challenge_end")
-    def challenge_end_greater_now(cls, value: datetime) -> datetime:
+    def challenge_end_validator(cls, value: datetime) -> datetime:
         """Validate challenge end date."""
         now = datetime.utcnow()
 
